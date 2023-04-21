@@ -13,14 +13,14 @@ public class PlcHandleService {
     private PlcCatch plcCatch;
 
     public void writeInt(String ip, String db, Short b) throws Exception {
-        db = db.replaceAll("[^0-9.]", "");
+        db = "DB" + db.replaceAll("[^0-9.]", "");
         S7PLC connector = plcCatch.getConnector(ip);
         if (connector == null) throw new Exception("未找到ip为" + ip + "的plc");
         connector.writeInt16(db, b);
     }
 
     public Integer readInt(String ip, String db) throws Exception {
-        db = db.replaceAll("[^0-9.]", "");
+        db = "DB" + db.replaceAll("[^0-9.]", "");
         S7PLC connector = plcCatch.getConnector(ip);
         if (connector == null) throw new Exception("未找到ip为" + ip + "的plc");
         short res = connector.readInt16(db);
