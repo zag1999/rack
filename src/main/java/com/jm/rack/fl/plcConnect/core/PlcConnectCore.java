@@ -1,6 +1,7 @@
 package com.jm.rack.fl.plcConnect.core;
 
 import HslCommunication.Profinet.Siemens.SiemensPLCS;
+import com.github.xingshuangs.iot.protocol.s7.enums.EPlcType;
 import com.jm.rack.service.ESignService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
@@ -28,7 +29,7 @@ public class PlcConnectCore {
         List<String> ipAddressList = eSignService.getAllPlcIpAddress();
         if (ipAddressList.size() > 0) {
             for (String ipAddress : ipAddressList) {
-                plcCatch.setPlcConnector(SiemensPLCS.S1200, ipAddress);
+                plcCatch.setPlcConnector(EPlcType.S1200, ipAddress);
             }
         } else {
             log.error("未从配置表e_sign中找到任何plc的ip地址");

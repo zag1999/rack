@@ -125,6 +125,12 @@
             <version>1.18</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.xingshuangs</groupId>
+            <artifactId>iot-communication</artifactId>
+            <version>1.2.7</version>
+        </dependency>
+
     </dependencies>
 
 
@@ -213,15 +219,15 @@
             </activation>
         </profile>
     </profiles>
-<!--    <repositories>-->
-<!--        <repository>-->
-<!--            <id>apache</id>-->
-<!--            <url>https://repo.maven.apache.org/maven2</url>-->
-<!--        </repository>-->
-<!--        <repository>-->
-<!--            <id>clojars</id>-->
-<!--            <url>http://clojars.org/repo/</url>-->
-<!--        </repository>-->
-<!--    </repositories>-->
+    <!--    <repositories>-->
+    <!--        <repository>-->
+    <!--            <id>apache</id>-->
+    <!--            <url>https://repo.maven.apache.org/maven2</url>-->
+    <!--        </repository>-->
+    <!--        <repository>-->
+    <!--            <id>clojars</id>-->
+    <!--            <url>http://clojars.org/repo/</url>-->
+    <!--        </repository>-->
+    <!--    </repositories>-->
 
 </project>

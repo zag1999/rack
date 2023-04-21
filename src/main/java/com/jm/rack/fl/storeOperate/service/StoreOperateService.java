@@ -9,7 +9,6 @@ import com.jm.rack.fl.storeOperate.mapper.StoreOperateMapper;
 import com.jm.rack.fl.storeOperate.po.StoveAndPlcPo;
 import com.jm.rack.mapper.MatRackInfoMapper;
 import com.jm.rack.mapper.PlanMatInfoMapper;
-import com.jm.rack.untils.HslHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -54,7 +53,7 @@ public class StoreOperateService {
                 // 计算最终库存值
                 int value = po.getMatnum() - po.getQuantity();
                 // 写入plc
-                plcHandleService.writeShort(po.getPlcip(), po.getComNo() + po.getComChildNo(), (short) value);
+                plcHandleService.writeInt(po.getPlcip(), po.getComNo() + po.getComChildNo(), (short) value);
                 //更细数据库
                 matRackInfoMapper.updateMatnumByCode(value, po.getMatno());
             } catch (Exception e) {
@@ -104,9 +103,9 @@ public class StoreOperateService {
                 int value = g.getQuantity();
                 // TODO 报警喊喇叭
                 // 写入数量
-                plcHandleService.writeShort(g.getPlcip(), g.getComNo() + g.getComChildNo(), (short) value);
+                plcHandleService.writeInt(g.getPlcip(), g.getComNo() + g.getComChildNo(), (short) value);
                 // 亮绿灯
-                plcHandleService.writeShort(g.getPlcip(), g.getComNo() + g.getOpenLight(), PlcShortInstruct.RED_LIGHT.getValue());
+                plcHandleService.writeInt(g.getPlcip(), g.getComNo() + g.getOpenLight(), PlcShortInstruct.RED_LIGHT.getValue());
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
@@ -125,7 +124,7 @@ public class StoreOperateService {
         for (StoveAndPlcPo g : exceedAlarmValue) {
             try {
                 // 亮黄灯
-                plcHandleService.writeShort(g.getPlcip(), g.getComNo() + g.getOpenLight(), PlcShortInstruct.YELLOW_LIGHT.getValue());
+                plcHandleService.writeInt(g.getPlcip(), g.getComNo() + g.getOpenLight(), PlcShortInstruct.YELLOW_LIGHT.getValue());
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
@@ -153,7 +152,7 @@ public class StoreOperateService {
                 int value = plcHandleService.readInt(item.getPlcip(), item.getComNo() + item.getState());
                 if (value == 1) needFinish.add(item.getMatid());
                 //读到1已拣货状态时显示给页面并且需要再将状态复位
-                if (value == 1) plcHandleService.writeShort(item.getPlcip(), item.getComNo() + item.getState(), (short) 0);
+                if (value == 1) plcHandleService.writeInt(item.getPlcip(), item.getComNo() + item.getState(), (short) 0);
             } catch (Exception e) {
                 log.error("读取ip为" + item.getPlcip() + "plc点" + item.getComNo() + item.getState() + "失败", e);
             }

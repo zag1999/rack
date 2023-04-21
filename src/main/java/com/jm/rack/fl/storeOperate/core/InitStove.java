@@ -38,9 +38,9 @@ public class InitStove {
                 // 库存值
                 int value = po.getMatnum();
                 // 库存值写入plc
-                plcHandleService.writeShort(po.getPlcip(), po.getComNo() + po.getComChildNo(), (short) value);
+                plcHandleService.writeInt(po.getPlcip(), po.getComNo() + po.getComChildNo(), (short) value);
                 if (value <= po.getMatmin()) {
-                    plcHandleService.writeShort(po.getPlcip(), po.getComNo() + po.getOpenLight(), PlcShortInstruct.YELLOW_LIGHT.getValue());
+                    plcHandleService.writeInt(po.getPlcip(), po.getComNo() + po.getOpenLight(), PlcShortInstruct.YELLOW_LIGHT.getValue());
                 }
             } catch (Exception e) {
                 log.error(e.getMessage());

@@ -11,7 +11,7 @@ public enum InteractionOperator {
     NUM_CHANGE() {
         @Override
         public void apply(InteractionSign item) throws Exception {
-            plcHandleService.writeShort(item.getPlcip(), item.getComNo() + item.getInteractionNum(), (short) 1);
+            plcHandleService.writeInt(item.getPlcip(), item.getComNo() + item.getInteractionNum(), (short) 1);
         }
     },
     /**
@@ -20,7 +20,7 @@ public enum InteractionOperator {
     LIGHT_ON {
         @Override
         public void apply(InteractionSign item) throws Exception {
-            plcHandleService.writeShort(item.getPlcip(), item.getComNo() + item.getInteractionLightOn(), (short) 1);
+            plcHandleService.writeInt(item.getPlcip(), item.getComNo() + item.getInteractionLightOn(), (short) 1);
         }
     },
     /**
@@ -29,7 +29,7 @@ public enum InteractionOperator {
     LIGHT_OFF {
         @Override
         public void apply(InteractionSign item) throws Exception {
-            plcHandleService.writeShort(item.getPlcip(), item.getComNo() + item.getInteractionLightOff(), (short) 1);
+            plcHandleService.writeInt(item.getPlcip(), item.getComNo() + item.getInteractionLightOff(), (short) 1);
         }
     },
     /**
@@ -38,7 +38,7 @@ public enum InteractionOperator {
     STOVE_FINISH {
         @Override
         public void apply(InteractionSign item) throws Exception {
-            plcHandleService.writeShort(item.getPlcip(), item.getComNo() + item.getInteractionStoveFinish(), (short) 1);
+            plcHandleService.writeInt(item.getPlcip(), item.getComNo() + item.getInteractionStoveFinish(), (short) 1);
         }
     },
     /**
@@ -47,7 +47,7 @@ public enum InteractionOperator {
     FILL_LIGHT {
         @Override
         public void apply(InteractionSign item) throws Exception {
-            plcHandleService.writeShort(item.getPlcip(), item.getComNo() + item.getInteractionFillLight(), (short) 1);
+            plcHandleService.writeInt(item.getPlcip(), item.getComNo() + item.getInteractionFillLight(), (short) 1);
         }
     },
     /**
@@ -56,7 +56,7 @@ public enum InteractionOperator {
     FILL {
         @Override
         public void apply(InteractionSign item) throws Exception {
-            plcHandleService.writeShort(item.getPlcip(), item.getComNo() + item.getInteractionFill(), (short) 1);
+            plcHandleService.writeInt(item.getPlcip(), item.getComNo() + item.getInteractionFill(), (short) 1);
         }
     },
     /**
@@ -65,7 +65,7 @@ public enum InteractionOperator {
     ALL_LIGHT_ON {
         @Override
         public void apply(InteractionSign item) throws Exception {
-            plcHandleService.writeShort(item.getPlcip(), item.getComNo() + item.getInteractionLightOnAll(), (short) 1);
+            plcHandleService.writeInt(item.getPlcip(), item.getComNo() + item.getInteractionLightOnAll(), (short) 1);
         }
     },
     /**
@@ -74,7 +74,7 @@ public enum InteractionOperator {
     ALL_LIGHT_ON_FINISH {
         @Override
         public void apply(InteractionSign item) throws Exception {
-            plcHandleService.writeShort(item.getPlcip(), item.getComNo() + item.getInteractionLightOnAllF(), (short) 1);
+            plcHandleService.writeInt(item.getPlcip(), item.getComNo() + item.getInteractionLightOnAllF(), (short) 1);
         }
     },
     /**
@@ -83,7 +83,7 @@ public enum InteractionOperator {
     ALL_LIGHT_OFF {
         @Override
         public void apply(InteractionSign item) throws Exception {
-            plcHandleService.writeShort(item.getPlcip(), item.getComNo() + item.getInteractionLightOffAll(), (short) 1);
+            plcHandleService.writeInt(item.getPlcip(), item.getComNo() + item.getInteractionLightOffAll(), (short) 1);
         }
     },
     /**
@@ -92,7 +92,7 @@ public enum InteractionOperator {
     ALL_LIGHT_OFF_FINISH {
         @Override
         public void apply(InteractionSign item) throws Exception {
-            plcHandleService.writeShort(item.getPlcip(), item.getComNo() + item.getInteractionLightOffAllF(), (short) 1);
+            plcHandleService.writeInt(item.getPlcip(), item.getComNo() + item.getInteractionLightOffAllF(), (short) 1);
         }
     },
     /**
@@ -101,7 +101,7 @@ public enum InteractionOperator {
     RESET {
         @Override
         public void apply(InteractionSign item) throws Exception {
-            plcHandleService.writeShort(item.getPlcip(), item.getComNo() + item.getInteractionReset(), (short) 1);
+            plcHandleService.writeInt(item.getPlcip(), item.getComNo() + item.getInteractionReset(), (short) 1);
         }
     };
 
