@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<html>
 
 <head>
 	<meta charset="utf-8">
@@ -415,37 +414,16 @@
 			},
 			updatestate(id, call) {
 				let that = this
-				Network(that, 'mesfact/planUpdate', "GET", {
-					'planId': id,
-					'state': 1
-				}, function (res) {
-					that.tableData[0].state = "执行中"
-					that.planName = that.tableData[0].planno
-					that.loadAaBomList(id)
-					if (call) {
-						let data = {
-							"type": '10',
-							"mat": type
-						}
-						that.websocketsend(JSON.stringify(data));
-						// if(that.tableData[1] && (that.tableData[0].vin == that.tableData[1].vin)){
-						// 	console.log("44444444444444")
-						// setTimeout(()=>{
-						//   let data = {
-						//   	"type": '10',
-						//   	"mat": type
-						//   }
-						//   that.websocketsend(JSON.stringify(data));	
-						// },2000)	
-						// console.log("55555555555555")
-						// }
-						
-					
+				that.tableData[0].state = "执行中"
+				that.planName = that.tableData[0].planno
+				that.loadAaBomList(id)
+				if (call) {
+					let data = {
+						"type": '10',
+						"mat": type
 					}
-
-				}, function (msg) {
-					that.$message.error(msg);
-				})
+					that.websocketsend(JSON.stringify(data));
+				}
 			},
 			loadTableData() {
 				let that = this
@@ -547,24 +525,16 @@
 					that.getPlanMatInfoListByPlanId()
 					//是否拍完所有
 					if (res.readstate) {
-						console.log("666666666666666")
-						Network(that, 'mesfact/planUpdate', "GET", {
-							'planId': that.tableData[0].planId,
-							'state': 2
-						}, function (res) {
-							that.needTimer = false
-							clearInterval(that.clapTimer)
-							that.stopAuto = true
-							that.loadTableData()
-							let data = {
-								"type": '11',
-								"mat": type
-							}
-							that.websocketsend(JSON.stringify(data));
-							clearInterval(that.clapTimer);
-						}, function (msg) {
-							that.$message.error(msg);
-						})
+						that.needTimer = false
+						clearInterval(that.clapTimer)
+						that.stopAuto = true
+						that.loadTableData()
+						let data = {
+							"type": '11',
+							"mat": type
+						}
+						that.websocketsend(JSON.stringify(data));
+						clearInterval(that.clapTimer);
 					}
 				}, function (msg) {
 
