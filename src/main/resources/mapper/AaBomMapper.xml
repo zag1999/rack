@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.rack.mapper.AaBomMapper">
+
+    <resultMap id="BaseResultMap" type="com.jm.rack.pojo.AaBom">
+            <result property="iid" column="iID" jdbcType="FLOAT"/>
+            <result property="factorycode" column="FactoryCode" jdbcType="VARCHAR"/>
+            <result property="xuhao" column="xuhao" jdbcType="VARCHAR"/>
+            <result property="jzbomid" column="jzbomid" jdbcType="VARCHAR"/>
+            <result property="prono" column="ProNo" jdbcType="VARCHAR"/>
+            <result property="matno" column="MatNo" jdbcType="VARCHAR"/>
+            <result property="matname" column="MatName" jdbcType="VARCHAR"/>
+            <result property="quantity" column="Quantity" jdbcType="FLOAT"/>
+            <result property="unit" column="Unit" jdbcType="VARCHAR"/>
+            <result property="sapver" column="SAPVer" jdbcType="VARCHAR"/>
+            <result property="state" column="State" jdbcType="FLOAT"/>
+            <result property="createtime" column="CreateTime" jdbcType="TIMESTAMP"/>
+            <result property="createuser" column="CreateUser" jdbcType="VARCHAR"/>
+            <result property="updateuser" column="UpdateUser" jdbcType="VARCHAR"/>
+            <result property="updatetime" column="UpdateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        iID,FactoryCode,xuhao,
+        jzbomid,ProNo,MatNo,
+        MatName,Quantity,Unit,
+        SAPVer,State,CreateTime,
+        CreateUser,UpdateUser,UpdateTime
+    </sql>
+</mapper>

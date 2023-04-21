@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>浩亚智能科技</title>
+		<link rel="stylesheet" href="../../js/element.css">
+	</head>
+	<style>
+		html,
+		body,
+		#app {
+			padding: 0px;
+			margin: 0px;
+			min-width: 1366px;
+		}
+
+		.el-menu {
+			border-right: solid 0px #e6e6e6;
+		}
+
+		.el-menu-item.is-active {
+			background-color: #265BDD !important; //你要修改的颜色
+		}
+
+		.el-menu--horizontal>.el-menu-item.is-active {
+			border-bottom: none;
+		}
+
+		::-webkit-scrollbar {
+			display: none;
+		}
+	</style>
+	<body>
+		<div id="app" style="height: 100vh;">
+			<el-row >
+				<el-col :span="2">
+					<div style="display: flex;justify-content: center;align-items: center;height: 8vh;background-color: #001529;">
+						<h3 style="color: white;text-align: center;">浩亚智能科技</h3>
+					</div>
+				</el-col>
+				<el-col :span="22">
+				<div style="display: flex;justify-content: space-between;align-items: center;height: 8vh;background-color: #001529;">
+					<h2 style="color: white;">电子拣货系统</h2>
+					<div style="display: flex;align-items: center;">
+						<h4 style="color:white;margin-right:20px">{{name}}</h4>
+						<el-dropdown style="color: white;">
+							<span class="el-dropdown-link">
+								操作<i class="el-icon-arrow-down el-icon--right"></i>
+							</span>
+							<el-dropdown-menu slot="dropdown">
+								<el-dropdown-item @click.native="updatename()">修改账户名</el-dropdown-item>
+								<el-dropdown-item @click.native="updatepwd()">修改密码</el-dropdown-item>
+								<el-dropdown-item @click.native="updatesc()">修改二级密码</el-dropdown-item>
+								<el-dropdown-item @click.native="exit()">退出</el-dropdown-item>
+							</el-dropdown-menu>
+						</el-dropdown>
+					</div>
+				</div>
+				</el-col>
+			</el-row>
+			<el-row>
+				<el-col :span="2">
+					<div style="overflow-x:hidden;height: 92vh;">
+						<el-menu style="height:100%" :default-active="activeIndex1" class="el-menu-vertical-demo"
+							background-color="#001529" text-color="#ffffff" active-text-color="#ffffff">
+							<el-submenu index="1-1">
+								<template slot="title">拣货系统</template>
+								
+								<el-menu-item  v-for="(item,index) in menuDatas" :index="index+''" @click="turnpage(index)">
+									{{item}}
+								</el-menu-item>
+							
+							</el-submenu>
+						</el-menu>
+					</div>
+				</el-col>
+				<!-- 列表展示 -->
+				<el-col :span="22">
+					<div>
+						<keep-alive>
+							<iframe id="iframe" :src="src" style="width: 100%;height:88vh;" frameborder="no"
+								style="border:medium none"></iframe>
+						</keep-alive>
+						<div style="display: flex;justify-content: center;height:3vh;">
+							<span>浩亚智能控制系统 Copyright ®上海浩亚智能科技股份有限公司 联系电话:400-186-7588</span>
+						</div>
+					</div>
+				</el-col>
+			</el-row>
+		</div>
+	</body>
+     <script src="../../js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/vue.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/element.js"></script>
+	<script src="../../js/network.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		var app = new Vue({
+			el: "#app",
+			data: {
+				URLlIST: URLlIST,
+				activeIndex1:'0',
+				name: '',
+				src:'../menu/rack_info.html',
+				menuDatas:['料架设置','标签绑定','人员管理','拣货记录','补货记录','计划调整','柜外物料维护']
+			},
+			methods: {
+				turnpage: function(index) {
+					if (index == this.activeIndex1) {
+						return
+					} else {
+						this.activeIndex1 = index+''
+					}
+					var url =  "../menu/"+URLlIST[parseInt(index)] + ".html";
+					this.src = url
+				},
+				updatename() {
+					let that = this
+					that.$prompt('账户名', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						inputValue:that.name
+					}).then(({
+						value
+					}) => {
+						if (!value) {
+							that.$message({
+								message: '请输入新的账户名',
+								type: 'warning'
+							});
+							return
+						}
+						let data = {
+							'username': value,
+							'userid': localStorage.getItem("uid")
+						}
+						Network(that,'rackuser/update', "GET", data, function(res) {
+							that.$message({
+								message: '账户名修改成功',
+								type: 'success'
+							});
+							that.name = value
+						}, function(msg) {
+							that.$message.error(msg);
+						})
+					}).catch(() => {
+						that.$message({
+							type: 'info',
+							message: '取消输入'
+						});
+					});
+				},
+				updatepwd() {
+					let that = this
+					that.$prompt('密码', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						inputType: "password"
+					}).then(({
+						value
+					}) => {
+						if (!value) {
+							that.$message({
+								message: '请输入密码',
+								type: 'warning'
+							});
+							return
+						}
+						let data = {
+							'password': value,
+							'userid': localStorage.getItem("uid")
+						}
+						Network(that,'rackuser/update', "GET", data, function(res) {
+							that.$message({
+								message: '密码修改成功',
+								type: 'success'
+							});
+						}, function(msg) {
+							that.$message.error(msg);
+						})
+					}).catch(() => {
+						that.$message({
+							type: 'info',
+							message: '取消输入'
+						});
+					});
+				},
+				updatesc() {
+					let that = this
+					that.$prompt('二级密码', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						inputType: "password"
+					}).then(({
+						value
+					}) => {
+						if (!value) {
+							that.$message({
+								message: '请输入二级密码',
+								type: 'warning'
+							});
+							return
+						}
+						if(value.length<8){
+							that.$message({
+								message: '二级密码至少8位',
+								type: 'error'
+							});
+							return
+						}
+						let data = {
+							'secondlevel': value,
+							'userid': localStorage.getItem("uid")
+						}
+						Network(that,'rackuser/update', "GET", data, function(res) {
+							that.$message({
+								message: '二级密码修改成功',
+								type: 'success'
+							});
+						}, function(msg) {
+							that.$message.error(msg);
+						})
+					}).catch(() => {
+						that.$message({
+							type: 'info',
+							message: '取消输入'
+						});
+					});
+				},
+				exit: function() {
+					this.$confirm('此操作将退出, 是否继续?', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						localStorage.setItem("uid", '');
+						localStorage.setItem("uname", '');
+						window.location.replace("../login/login.html")
+					}).catch(() => {
+
+					});
+				},
+			},
+			created: function() {
+				this.name = localStorage.getItem("uname")
+			}
+		})
+	</script>
+</html>

@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>浩亚智能科技</title>
+		<link rel="stylesheet" href="../../js/element.css">
+	</head>
+	<style>
+		html,
+		body,
+		#app {
+			padding: 0px;
+			margin: 0px;
+			min-width: 1366px;
+		}
+
+		.el-menu {
+			border-right: solid 0px #e6e6e6;
+		}
+
+		.el-menu-item.is-active {
+			background-color: #265BDD !important; //你要修改的颜色
+		}
+
+		.el-menu--horizontal>.el-menu-item.is-active {
+			border-bottom: none;
+		}
+
+		::-webkit-scrollbar {
+			display: none;
+		}
+	</style>
+	<body>
+		<div id="app">
+			<h2 style="margin:20px;">人员管理</h2>
+			<el-table :data="tableData" style="width: 100%;margin:20px;">
+				<el-table-column label="序号" type="index" width="150">
+				</el-table-column>
+				<el-table-column label="用户" width="150">
+					<template slot-scope="scope">
+						<i class="el-icon-user"></i>
+						<span style="margin-left:2px">{{ scope.row.username }}</span>
+					</template>
+				</el-table-column>
+				<el-table-column label="级别" width="150">
+					<template slot-scope="scope">
+						<el-tag type="success">{{scope.row.levelName}}</el-tag>
+					</template>
+				</el-table-column>
+				<el-table-column prop="createtime" width="250" label="创建时间">
+				</el-table-column>
+				<el-table-column label="操作" width="150"  v-if="level !=0 ">
+					<template slot-scope="scope">
+						<el-dropdown split-button type="primary" v-if=" scope.row.userid != uid "> 
+						  操作
+						  <el-dropdown-menu slot="dropdown">
+						    <el-dropdown-item v-if=" scope.row.levels != 2 "  @click.native="updateLevel(2,scope.row.userid)">超级管理员</el-dropdown-item>
+						    <el-dropdown-item v-if="scope.row.levels != 1 " @click.native="updateLevel(1,scope.row.userid)">组长</el-dropdown-item>
+						   <el-dropdown-item v-if="scope.row.levels != 0" @click.native="updateLevel(0,scope.row.userid)">普通员工</el-dropdown-item>
+						  </el-dropdown-menu>
+						</el-dropdown>
+					</template>
+				</el-table-column>
+
+			</el-table>
+		</div>
+	</body>
+	<script src="../../js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/vue.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/element.js"></script>
+	<script src="../../js/network.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		var app = new Vue({
+			el: "#app",
+			data: {
+				tableData: [],
+				level:0,
+				uid:''
+			},
+			methods: {
+				updateLevel(index,id){
+				      let that = this
+					    that.$confirm('此操作将修改级别, 是否继续?', '提示', {
+					          confirmButtonText: '确定',
+					          cancelButtonText: '取消',
+					          type: 'warning'
+					        }).then(() => {
+							  Network(that, 'rackuser/update', "GET", {"levels":index,"userid":id}, function(res) {
+								that.$message({
+								  type: 'success',
+								  message: '修改成功!'
+								});
+								that.loadData()
+							  }, function(msg) {
+							  	that.$message.error(msg);
+							  })
+					        }).catch(() => {
+					          that.$message({
+					            type: 'info',
+					            message: '已取消删除'
+					          });          
+					        });
+				},
+				loadData() {
+					let that = this
+					Network(that, 'rackuser/select', "GET", {}, function(res) {
+						for (var i = 0; i < res.list.length; i++) {
+							res.list[i].createtime = UTCtoDate(res.list[i].createtime, "")
+							var  str = ''
+							switch(res.list[i].levels){
+								case 0:
+								str = '普通员工' 
+								break
+								case 1:
+								str = '组长'
+								break
+								case 2:
+								str = '超级管理员'
+								break
+							}
+							console.log(res.list[i])
+							res.list[i].levelName =  str
+						}
+						that.tableData = res.list
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+				}
+			},
+			created: function() {
+				this.uid = localStorage.getItem("uid")
+				this.level = localStorage.getItem("level")
+				this.loadData()
+			}
+		})
+	</script>
+</html>

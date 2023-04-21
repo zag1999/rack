@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.rack.mapper.MatReplenishMapper">
+
+    <resultMap id="BaseResultMap" type="com.jm.rack.pojo.MatReplenish">
+            <id property="mrid" column="mrid" jdbcType="BIGINT"/>
+            <result property="rackname" column="rackname" jdbcType="VARCHAR"/>
+            <result property="rackmatno" column="rackmatno" jdbcType="VARCHAR"/>
+            <result property="matcountAdd" column="matcount_add" jdbcType="INTEGER"/>
+            <result property="matcountFront" column="matcount_front" jdbcType="INTEGER"/>
+            <result property="matcountLast" column="matcount_last" jdbcType="INTEGER"/>
+            <result property="matcode" column="matcode" jdbcType="VARCHAR"/>
+            <result property="matname" column="matname" jdbcType="VARCHAR"/>
+            <result property="staffname" column="staffname" jdbcType="VARCHAR"/>
+            <result property="createtime" column="createtime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        mrid,rackname,rackmatno,
+        matcount_add,matcount_front,matcount_last,
+        matcode,matname,staffname,
+        createtime
+    </sql>
+</mapper>

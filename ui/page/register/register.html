@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+		<meta name="referrer" content="no-referrer" />
+		<title>用户注册</title>
+		<link rel="stylesheet" href="../../js/element.css">
+
+		<style>
+			#app {
+				padding: 20px;
+				min-width: 1366px;
+				margin-left: 2%;
+				margin-right: 2%;
+
+			}
+
+			.flex {
+				display: flex;
+			}
+			
+			.flex-c {
+				display: flex;
+				flex-direction: column;
+			}
+
+			.flex_v {
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.flex_v1 {
+				display: flex;
+				align-items: center;
+			}
+
+		</style>
+	</head>
+	<body style="background-color: #F2F2F2;">
+		<div id="app">
+			<el-card class="box-card">
+				<div class="flex-c" v-if="!show">
+					<el-breadcrumb separator="/" style="padding: 20px;">
+						<el-breadcrumb-item><span @click="cancel()">登录页</span></el-breadcrumb-item>
+						<el-breadcrumb-item :to="{ path: '/' }">注册</el-breadcrumb-item>
+					</el-breadcrumb>
+					<span style="margin-left: 20px;font-size: 18px;" class="one-text">新增用户</span>
+						
+						<div class="flex" style="margin: 20px;">
+							<span style="margin-right: 25px;margin-top: 5px">账户:</span>
+							<el-input v-model="input_title1" placeholder="请输入账户名" style="width: 300px;" clearable></el-input>
+						</div>
+					<div class="flex" style="margin: 20px;">
+						<span style="margin-right: 25px;margin-top: 5px">密码:</span>
+						<el-input v-model="input_title2" placeholder="请输入登录密码" style="width: 300px;" clearable show-password></el-input>
+					</div>
+					
+					<div class="flex" style="margin: 20px;">
+						<span style="margin-right: 25px;margin-top: 5px">密码:</span>
+						<el-input v-model="input_title3" placeholder="请再次输入登录密码" style="width: 300px;" clearable show-password></el-input>
+					</div>
+					
+					<div class="flex" style="margin: 20px;">
+						<span style="margin-right: 25px;margin-top: 5px">二级密码:</span>
+						<el-input v-model="input_title4" placeholder="请输入二级密码,不少于8位" style="width: 300px;" clearable show-password></el-input>
+					</div>
+				
+					
+					
+					<!-- 发布 -->
+					<div class="flex" style="margin: 20px;">
+						<el-button type="warning" style="margin-left: 60px;" @click="register()">注册</el-button>
+						<el-button plain style="margin-left: 30px;" @click="cancel()">取消</el-button>
+					</div>
+				</div>
+				
+				
+				<el-row  v-if="show">
+				  <el-col >
+				    <el-result icon="success" title="注册成功">
+				      <template slot="extra">
+				        <el-button type="warning" size="medium"  @click="cancel()">返回</el-button>
+				      </template>
+				    </el-result>
+				  </el-col>
+				  
+				</el-row>
+			</el-card>
+		</div>
+	</body>
+	<script src="../../js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/vue.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/element.js"></script>
+	<script src="../../js/network.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		var app = new Vue({
+			el: "#app",
+			data: {
+				input_title1:'',
+				input_title2:'',
+				input_title3:'',
+				input_title4:'',
+				show:false
+			},
+			methods: {
+				cancel:function(){
+					window.location.href = "login.html";
+				},
+				register:function(){
+					var that = this
+					if (!that.input_title1) {
+						that.$message({
+							message: '请输入用户名',
+							type: 'warning'
+						});
+						return
+					}
+					if (!that.input_title2) {
+						that.$message({
+							message: '请输入密码',
+							type: 'warning'
+						});
+						return
+					}
+					if (!that.input_title3) {
+						that.$message({
+							message: '请再次输入密码',
+							type: 'warning'
+						});
+						return
+					}
+					if(that.input_title2!=that.input_title3){
+						that.$message({
+							message: '密码输入不一致',
+							type: 'error'
+						});
+						return
+					}
+					if(!that.input_title4){
+						that.$message({
+							message: '请输入二级密码',
+							type: 'error'
+						});
+						return
+					}
+					if(that.input_title4.length<8){
+						that.$message({
+							message: '二级密码至少8位',
+							type: 'error'
+						});
+						return
+					}
+					
+					var data = {
+						'username':that.input_title1,
+						'password': that.input_title2,
+						'secondlevel':that.input_title4,
+					}
+					Network(that,'rackuser/insert', "GET", data, function(res) {
+						localStorage.setItem("uid", res.user.userid);
+						localStorage.setItem("uname", res.user.username);
+						localStorage.setItem("level", res.user.levels);
+						window.location.href = '../index/index.html';
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+					
+				}
+			},
+			created: function() {
+
+			}
+		})
+	</script>
+</html>

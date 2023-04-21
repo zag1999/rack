@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.rack.fl.interactionSign.mapper.InteractionSignMapper">
+  <resultMap id="BaseResultMap" type="com.jm.rack.fl.interactionSign.po.InteractionSign">
+    <!--@mbg.generated-->
+    <!--@Table interaction_sign-->
+    <id column="interaction_id" property="interactionId" />
+    <result column="plcip" property="plcip" />
+    <result column="com_no" property="comNo" />
+    <result column="location" property="location" />
+    <result column="interaction_num" property="interactionNum" />
+    <result column="interaction_light_on" property="interactionLightOn" />
+    <result column="interaction_light_off" property="interactionLightOff" />
+    <result column="interaction_stove_finish" property="interactionStoveFinish" />
+    <result column="interaction_fill_light" property="interactionFillLight" />
+    <result column="interaction_fill" property="interactionFill" />
+    <result column="interaction_light_on_all" property="interactionLightOnAll" />
+    <result column="interaction_light_on_all_f" property="interactionLightOnAllF" />
+    <result column="interaction_light_off_all" property="interactionLightOffAll" />
+    <result column="interaction_light_off_all_f" property="interactionLightOffAllF" />
+    <result column="interaction_reset" property="interactionReset" />
+    <result column="stove_type" property="stoveType" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    interaction_id, plcip, com_no, `location`, interaction_num, interaction_light_on, 
+    interaction_light_off, interaction_stove_finish, interaction_fill_light, interaction_fill, 
+    interaction_light_on_all, interaction_light_on_all_f, interaction_light_off_all, 
+    interaction_light_off_all_f, interaction_reset, stove_type
+  </sql>
+
+  <select id="selectAll" resultMap="BaseResultMap">
+      select *
+      from interaction_sign;
+  </select>
+</mapper>

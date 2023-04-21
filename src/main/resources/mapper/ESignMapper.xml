@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.rack.mapper.ESignMapper">
+    <resultMap id="BaseResultMap" type="com.jm.rack.pojo.ESign">
+        <id property="eid" column="eid" jdbcType="BIGINT"/>
+        <id property="rackid" column="rackid" jdbcType="BIGINT"/>
+        <result property="matno" column="matno" jdbcType="VARCHAR"/>
+        <result property="comNo" column="com_no" jdbcType="VARCHAR"/>
+        <result property="stocksign" column="stocksign" jdbcType="INTEGER"/>
+        <result property="comChildNo" column="com_child_no" jdbcType="VARCHAR"/>
+        <result property="createtime" column="createtime" jdbcType="TIMESTAMP"/>
+        <result property="updatetime" column="updatetime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+    <sql id="Base_Column_List">
+        <!--@sql select-->
+        eid,
+        matno,
+        com_no,
+        stocksign,
+        rackid,
+        com_child_no,
+        createtime,
+        updatetime
+        <!--@sql from e_sign-->
+    </sql>
+    <update id="updateComNoAndComChildNoByEid">
+        update e_sign
+        set com_no       = #{comNo,jdbcType=VARCHAR},
+            com_child_no = #{comChildNo,jdbcType=NUMERIC}
+        where eid = #{eid,jdbcType=NUMERIC}
+    </update>
+    <update id="updateComNoAndComChildNoByMatnoAndStocksign">
+        update e_sign
+        set com_no       = #{comNo,jdbcType=VARCHAR},
+            com_child_no = #{comChildNo,jdbcType=NUMERIC}
+        where matno = #{matno,jdbcType=VARCHAR}
+          AND stocksign = #{stocksign,jdbcType=NUMERIC}
+    </update>
+
+    <select id="getAllPlcIpAddress" resultType="java.lang.String">
+        select *
+        from (select plcip
+              from e_sign
+              group by plcip) a
+        where plcip is not null
+          and plcip != ''
+    </select>
+</mapper>

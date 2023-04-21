@@ -1,0 +1,251 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>DataV</title>
+		
+		<link rel="stylesheet" href="js/element.css">
+		<script src="js/vue.js"></script>
+		<!--调试版-->
+		<script src="js/datav.js"></script>
+
+		<!--压缩版 生产版本-->
+		<!-- <script src="https://unpkg.com/@jiaminghi/data-view/dist/datav.min.vue.js"></script> -->
+		<style>
+			html,
+			body,
+			#app {
+				width: 100%;
+				height: 100%;
+				margin: 0px;
+				padding: 0px;
+				background-color: #0F1A48;
+				overflow: hidden;
+			}
+
+			.border-box-content {
+				color: white;
+				font-size: 20px;
+				font-weight: bold;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.style {
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+			}
+
+			.style1 {
+				font-size: 16px;
+				text-align: center;
+				margin: 10px;
+			}
+
+			.style2 {
+				font-size: 18px;
+				text-align: center;
+				margin: 10px;
+			}
+
+			.image1 {
+				width: 100%;
+				height: 18%;
+			}
+
+			.dv-scroll-board .rows .ceil {
+				padding: 0 10px;
+				box-sizing: border-box;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				font-size: 18px;
+			}
+
+			.dv-scroll-board .header .header-item {
+				padding: 0 10px;
+				box-sizing: border-box;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				transition: all 0.3s;
+				font-size: 20px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app">
+	    <el-button  @click = "assassa">点击发送</el-button>
+
+		</div>
+		<script src="js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/element.js"></script>
+		<script src="js/network.js"></script>
+		<script src="js/echarts.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			var app = new Vue({
+				el: "#app",
+				data: {
+					date: '',
+					time: '',
+					config: {
+						header: ['批次号', '类型', '颜色', '完成数量','计划开始时间','计划结束时间'],
+						data: [
+							['行1列1', '行1列2', '行1列3', '行1列1', ],
+							['行1列1', '行1列2', '行1列3', '行1列1', ],
+							['行1列1', '行1列2', '行1列3', '行1列1', ],
+							['行1列1', '行1列2', '行1列3', '行1列1', ],
+							['行1列1', '行1列2', '行1列3', '行1列1', ],
+							['行1列1', '行1列2', '行1列3', '行1列1', ],
+							['行1列1', '行1列2', '行1列3', '行1列1', ],
+							['行1列1', '行1列2', '行1列3', '行1列1', ],
+						],
+						headerBGC: '#0F1A48',
+						oddRowBGC: '#0F1A48',
+						evenRowBGC: '#101E50',
+						index: false,
+					    columnWidth: [150,100,80,50,130,130],
+						align: ['center']
+					},
+					config1: {
+						value: 80
+					},
+					URLlIST: URLlIST,
+					tableData: [],
+					row: 0,
+					column: 0,
+					count: 0,
+					elspan: 0,
+					objInfo: {
+						mCarNo: 'x',
+						frontback: 'x',
+						row: 'x',
+						column: 'x',
+						mName: 'x',
+						mCarType: 'x',
+						mCode: 'x',
+						mBatch: 'x',
+					},
+					timeout: 28 * 1000, //30秒一次心跳
+					timeoutObj: null, //心跳心跳倒计时
+					serverTimeoutObj: null, //心跳倒计时
+					timeoutnum: null, //断开 重连倒计时
+					websocket: null,
+					frontback: 'AB',
+					currentPage: 1,
+					pagesize: 6,
+					img:'img/camera.png',
+					planNum:0,
+					finishNum:0,
+					pre:0
+
+
+				},
+				methods: {
+					assassa(){
+						this.websocketsend('cplus');
+					},
+					initWebSocket() {
+						
+						const url = 'ws://127.0.0.1:8088/websocket/cplus'
+						this.websocket = new WebSocket(url)
+						// 连接错误
+						this.websocket.onerror = this.setErrorMessage
+
+						// 连接成功
+						this.websocket.onopen = this.setOnopenMessage
+
+						// 收到消息的回调
+						this.websocket.onmessage = this.setOnmessageMessage
+
+						// 连接关闭的回调
+						this.websocket.onclose = this.setOncloseMessage
+
+						// 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+						window.onbeforeunload = this.onbeforeunload
+					},
+					reconnect() { // 重新连接
+						if (this.lockReconnect) return;
+						this.lockReconnect = true;
+						//没连接上会一直重连，设置延迟避免请求过多
+						this.timeoutnum && clearTimeout(this.timeoutnum);
+						this.timeoutnum = setTimeout(() => {
+							//新连接
+							this.initWebSocket();
+							this.lockReconnect = false;
+						}, 5000);
+					},
+					reset() { // 重置心跳
+						// 清除时间
+						clearTimeout(this.timeoutObj);
+						clearTimeout(this.serverTimeoutObj);
+						// 重启心跳
+						this.start();
+					},
+					start() { // 开启心跳
+						this.timeoutObj && clearTimeout(this.timeoutObj);
+						this.serverTimeoutObj && clearTimeout(this.serverTimeoutObj);
+						this.timeoutObj = setTimeout(() => {
+							// 这里发送一个心跳，后端收到后，返回一个心跳消息，
+							if (this.websocket && this.websocket.readyState == 1) { // 如果连接正常
+								this.websocketsend('heartbeat');
+							} else { // 否则重连
+								this.reconnect();
+							}
+							this.serverTimeoutObj = setTimeout(() => {
+								//超时关闭
+								this.websocket.close();
+							}, this.timeout);
+
+						}, this.timeout)
+					},
+					setOnmessageMessage(event) {
+						let that = this
+						let obj = JSON.parse(event.data);
+						console.log("接收到的"+obj.type)
+						console.log("接收到的"+obj.content)
+						let a = obj.content
+						for (var i = 0; i < a.length; i++) {
+							console.log(a[i].count)
+						}
+						switch (obj.type) {
+							case 'heartbeat':
+								//收到服务器信息，心跳重置
+								this.reset();
+								break;}
+					},
+					setErrorMessage() {
+						//重连
+						this.reconnect();
+						console.log("WebSocket连接发生错误" + '   状态码：' + this.websocket.readyState)
+					},
+					setOnopenMessage() {
+						//开启心跳
+						this.start();
+						console.log("WebSocket连接成功" + '   状态码：' + this.websocket.readyState)
+					},
+					setOncloseMessage() {
+						//重连
+						this.reconnect();
+						console.log("WebSocket连接关闭" + '   状态码：' + this.websocket.readyState)
+					},
+					onbeforeunload() {
+						this.closeWebSocket();
+					},
+					//websocket发送消息
+					websocketsend(messsage) {
+						this.websocket.send(messsage)
+					},
+					closeWebSocket() { // 关闭websocket
+						this.websocket.close()
+					},
+				},
+				created: function() {
+					let that = this
+					this.initWebSocket()
+				},
+			})
+		</script>
+	</body>
+</html>

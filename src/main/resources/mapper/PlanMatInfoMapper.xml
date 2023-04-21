@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.rack.mapper.PlanMatInfoMapper">
+    <resultMap id="BaseResultMap" type="com.jm.rack.pojo.PlanMatInfo">
+        <id property="matid" column="matid" jdbcType="BIGINT"/>
+        <id property="planid" column="planid" jdbcType="BIGINT"/>
+        <result property="prono" column="prono" jdbcType="VARCHAR"/>
+        <result property="matstate" column="matstate" jdbcType="INTEGER"/>
+        <result property="carvin" column="carvin" jdbcType="VARCHAR"/>
+        <result property="matno" column="matno" jdbcType="VARCHAR"/>
+        <result property="matname" column="matname" jdbcType="VARCHAR"/>
+        <result property="quantity" column="quantity" jdbcType="DOUBLE"/>
+        <result property="createtime" column="createtime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        prono,
+        carvin,
+        planid,
+        matstate,
+        createtime
+    </sql>
+    <delete id="deleteByCreatetime">
+        delete
+        from plan_mat_info
+        where DATE_FORMAT(createtime, '%Y-%m-%d') &lt;&gt; DATE_FORMAT(now(), '%Y-%m-%d')
+    </delete>
+    <update id="updateMatstateByPronoAndCarvin">
+        update plan_mat_info
+        set matstate = #{matstate,jdbcType=NUMERIC}
+        where prono = #{prono,jdbcType=VARCHAR}
+          AND carvin = #{carvin,jdbcType=VARCHAR}
+    </update>
+    <update id="updateMatstateByPlanid">
+        update plan_mat_info
+        set matstate = #{matstate,jdbcType=NUMERIC}
+        where planid = #{planid,jdbcType=NUMERIC}
+    </update>
+    <select id="selectAllByPlanid" resultMap="BaseResultMap">
+        select *
+        from plan_mat_info
+        where planid = #{planid,jdbcType=NUMERIC}
+    </select>
+    <update id="updateMatstateByProno">
+        update plan_mat_info
+        set matstate = #{matstate,jdbcType=NUMERIC},
+            planid   = #{planid}
+        where prono = #{prono,jdbcType=VARCHAR}
+    </update>
+    <update id="toFinishById">
+        update plan_mat_info
+        set matstate = 1
+        where matid in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+    </update>
+</mapper>

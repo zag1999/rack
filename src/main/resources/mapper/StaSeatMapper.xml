@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.rack.mapper.StaSeatMapper">
+
+    <resultMap id="BaseResultMap" type="com.jm.rack.pojo.StaSeat">
+            <result property="iid" column="iID" jdbcType="INTEGER"/>
+            <result property="vin" column="vin" jdbcType="VARCHAR"/>
+            <result property="updateTime" column="update_time" jdbcType="TIMESTAMP"/>
+            <result property="flag" column="flag" jdbcType="INTEGER"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        iID,vin,update_time,
+        flag
+    </sql>
+    <select id="selectOneByVin" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from sta_seat
+        where
+        vin = #{vin,jdbcType=VARCHAR}
+    </select>
+</mapper>

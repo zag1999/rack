@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.rack.mapper.PlanInfoMapper">
+    <resultMap id="BaseResultMap" type="com.jm.rack.pojo.PlanInfo">
+        <id property="planId" column="plan_id" jdbcType="BIGINT"/>
+        <result property="logicNo" column="logic_no" jdbcType="BIGINT"/>
+        <result property="proname" column="proname" jdbcType="VARCHAR"/>
+        <result property="productdate" column="productdate" jdbcType="TIMESTAMP"/>
+        <result property="carvin" column="carvin" jdbcType="VARCHAR"/>
+        <result property="prono" column="prono" jdbcType="VARCHAR"/>
+        <result property="planno" column="planno" jdbcType="VARCHAR"/>
+        <result property="cartype" column="cartype" jdbcType="VARCHAR"/>
+        <result property="linetype" column="linetype" jdbcType="VARCHAR"/>
+        <result property="state" column="state" jdbcType="INTEGER"/>
+        <result property="createtime" column="createtime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        plan_id,
+        proname,
+        productdate,
+        logicno,
+        carvin,
+        prono,
+        planno,
+        cartype,
+        linetype,
+        state,
+        createtime
+    </sql>
+    <select id="selectAllByStateAndLinetype" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from plan_info
+        where state = #{state,jdbcType=NUMERIC}
+          AND linetype = #{linetype,jdbcType=VARCHAR}
+    </select>
+    <select id="selectcarvinbByPlanid" resultMap="BaseResultMap">
+        select carvin
+from plan_info
+where plan_id = #{planId,jdbcType=BIGINT}
+    </select>
+    <select id="selectAllByCarvin" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from plan_info
+        where carvin = #{carvin,jdbcType=VARCHAR}
+    </select>
+    <select id="countByStateAndLinetype" resultType="int">
+        select count(*)
+        from plan_info
+        where state = #{state,jdbcType=NUMERIC}
+          AND linetype = #{linetype,jdbcType=VARCHAR}
+    </select>
+    <update id="updateStateByPronoAndCarvin">
+        update plan_info
+        set state = #{state,jdbcType=NUMERIC}
+        where prono = #{prono,jdbcType=VARCHAR}
+          AND carvin = #{carvin,jdbcType=VARCHAR}
+    </update>
+    <select id="selectPlannoByLinetype" resultMap="BaseResultMap">
+        select planno
+        from plan_info
+        where linetype = #{linetype,jdbcType=VARCHAR}
+        GROUP BY planno
+    </select>
+    <update id="updateStateByPlanno">
+        update plan_info
+        set state = #{state,jdbcType=NUMERIC}
+        where planno = #{planno,jdbcType=VARCHAR}
+    </update>
+</mapper>

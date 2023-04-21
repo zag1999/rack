@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.rack.mapper.MaterialInfoMapper">
+
+    <resultMap id="BaseResultMap" type="com.jm.rack.pojo.MaterialInfo">
+        <id property="materialInfoId" column="material_info_id" jdbcType="BIGINT"/>
+        <result property="currow" column="currow" jdbcType="INTEGER"/>
+        <result property="curcolumn" column="curcolumn" jdbcType="INTEGER"/>
+        <result property="rackInfoId" column="rack_info_id" jdbcType="BIGINT"/>
+        <result property="matno" column="matno" jdbcType="VARCHAR"/>
+        <result property="createtime" column="createtime" jdbcType="TIMESTAMP"/>
+        <result property="updatetime" column="updatetime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        material_info_id,currow,curcolumn,
+        rack_info_id,matno,createtime,updatetime
+    </sql>
+    <delete id="deleteByRackInfoId">
+delete from material_info
+where
+rack_info_id = #{rackInfoId,jdbcType=NUMERIC}
+</delete>
+    <select id="searchAllByRackInfoId" resultMap="BaseResultMap">
+        select
+        <include refid="Base_Column_List"/>
+        from material_info
+        where
+        rack_info_id = #{rackInfoId,jdbcType=NUMERIC}
+        order by currow
+    </select>
+    <update id="updateMatcountByCode">
+update material_info
+ set matcount = #{matcount,jdbcType=NUMERIC}
+where
+code = #{code,jdbcType=VARCHAR}
+</update>
+
+</mapper>

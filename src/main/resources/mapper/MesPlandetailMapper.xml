@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.rack.mapper.MesPlandetailMapper">
+
+    <resultMap id="BaseResultMap" type="com.jm.rack.pojo.MesPlandetail">
+            <id property="iid" column="iID" jdbcType="INTEGER"/>
+            <result property="factorycode" column="FactoryCode" jdbcType="VARCHAR"/>
+            <result property="planno" column="PlanNo" jdbcType="VARCHAR"/>
+            <result property="iseq" column="iSeq" jdbcType="INTEGER"/>
+            <result property="prono" column="ProNo" jdbcType="VARCHAR"/>
+            <result property="proname" column="ProName" jdbcType="VARCHAR"/>
+            <result property="quantity" column="Quantity" jdbcType="INTEGER"/>
+            <result property="procode" column="ProCode" jdbcType="VARCHAR"/>
+            <result property="verno" column="VerNo" jdbcType="VARCHAR"/>
+            <result property="cartype" column="CarType" jdbcType="VARCHAR"/>
+            <result property="carbody" column="CarBody" jdbcType="VARCHAR"/>
+            <result property="carvin" column="CarVIN" jdbcType="VARCHAR"/>
+            <result property="process" column="Process" jdbcType="INTEGER"/>
+            <result property="meter" column="Meter" jdbcType="INTEGER"/>
+            <result property="flag" column="flag" jdbcType="INTEGER"/>
+            <result property="isprint" column="isPrint" jdbcType="INTEGER"/>
+            <result property="printtime" column="PrintTime" jdbcType="TIMESTAMP"/>
+            <result property="isproducted" column="isProducted" jdbcType="INTEGER"/>
+            <result property="producttime" column="ProductTime" jdbcType="TIMESTAMP"/>
+            <result property="creattime" column="creattime" jdbcType="TIMESTAMP"/>
+            <result property="updatetime" column="UpdateTime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        iID,FactoryCode,PlanNo,
+        iSeq,ProNo,ProName,
+        Quantity,ProCode,VerNo,
+        CarType,CarBody,CarVIN,
+        Process,Meter,flag,
+        isPrint,PrintTime,isProducted,
+        ProductTime,creattime,UpdateTime
+    </sql>
+    <select id="selectMesPlanDetailsByLineNo" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select * from  Mes_PlanDetail  where [PlanNo] = #{planno}
+    </select>
+</mapper>

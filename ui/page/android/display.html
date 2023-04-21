@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>浩亚智能科技</title>
+		<link rel="stylesheet" href="../../js/element.css">
+		<!-- 旧的货道大屏 -->
+	</head>
+	<style>
+		html,
+		body,
+		#app {
+			width: 100%;
+			height: 100%;
+			margin: 0px;
+			padding: 0px;
+			overflow: hidden;
+			background-color: #011327;
+		}
+
+		.item {
+			margin-bottom: 3px;
+		}
+
+		.el-card__header {
+			padding: 0px 0px;
+			border-bottom: 1px solid #EBEEF5;
+			-webkit-box-sizing: border-box;
+			box-sizing: border-box;
+		}
+
+		.el-card__body {
+			padding: 1px;
+		}
+
+		.box-card {
+			width: 130px;
+			/* border-bottom: 1px solid #00a8e1; */
+			height: 116px;
+		}
+
+		.text {
+			font-size: 10px;
+		}
+	</style>
+	<body>
+		<div id="app" style="height: 100vh;">
+			<div style="display: flex;justify-content: space-between;color:white;height:5vh;background-color: #192B3F;">
+				<div style="display: flex;align-items: center;margin-left: 10px;flex: 1;">
+					<img src="../../icon/nuobo.png" style="height: 20px;width: 20px;" />
+					<span style="margin-left: 5px;font-weight: bold;font-size: 12px;">诺博汽车系统有限公司</span>
+				</div>
+				<div style="display: flex;justify-content: center;flex: 1;align-items: center;flex-direction: column;">
+					<div
+						style="color: white;font-size:16px;font-weight: bold;width: 100%;text-align: center;margin-top:1px;">
+						座椅KITING物料电子拣货系统</div>
+				</div>
+				<div style="display: flex;align-items: center;flex: 1;justify-content:right;font-size: 12px;">
+					<div style="position: absolute;right: 10px;">{{curdate}}</div>
+				</div>
+			</div>
+			<div style="display: flex;justify-content: space-between;color:white;height: 3vh;align-items: center;">
+			    <div></div>
+				<div style="font-size:14px;height: 3vh;line-height: 3vh;text-align: center;position: relative;left:50px;">
+					{{needData.lable}}
+				</div>
+				<div style="display:flex;font-size:10px;margin-right: 12px;">
+					<div
+						style="background-color: #006401;color: white;margin-right:5px;padding: 2px;height: 2vh;line-height: 2vh;">
+						库存正常
+					</div>
+					<div
+						style="background-color: #FF0101;color: white;margin-right: 5px;padding: 2px;height: 2vh;line-height: 2vh;">
+						库存不足
+					</div>
+				</div>
+			</div>
+
+			<div
+				style="width: 100%;flex-direction: row;display: flex;flex-wrap:wrap;height:90vh;justify-content: center;">
+				<div v-for="(item,index) in needData.list" style="margin:2px;font-size: 8px;">
+					<el-card class="box-card">
+						<div slot="header" style="display: flex;justify-content:center;flex-direction: column;">
+							<span style="text-align: center;margin-top:2px;">{{item.rackmatno}}</span>
+							<span style="margin-top: 2px;height:10px;"
+								:style="{ 'background':item.show?'#FF0101':'#006401' }"></span>
+						</div>
+						<div v-if="item.list.length>0" style="display: flex;justify-content: center;align-items: center;height:90px;flex-direction: column;">
+							
+							<div v-for="(item1,index) in item.list" >
+								<div class="item">编码:{{item1.code}}</div>
+								<div class="item">名称:{{item1.name}}</div>
+								<div class="item" style="display: flex;align-items: center;">
+									<span>库存:</span>
+									<span
+										style="border:  1px #efefef solid;text-align: center;width: 100px;">{{item1.matnum}}</span>
+								</div>
+							</div>
+							
+						</div>
+						
+						<div v-if="item.list.length==0" style="display: flex;justify-content: center;align-items: center;flex-direction: column;height:80px;">
+							<img src="../../image/matempty.png" style="height:30px;width: 30px;">
+							<span style="margin-top:5px;">物料未设置</span>
+						</div>
+					</el-card>
+				</div>
+
+			</div>
+
+			<div style="display: flex;justify-content: center;height:2vh;font-size:8px;color: white;">
+				<span>浩亚智能控制系统 Copyright ®上海浩亚智能科技股份有限公司 联系电话:400-186-7588</span>
+			</div>
+
+		</div>
+	</body>
+	<script src="../../js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/vue.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/datav.js"></script>
+	<script src="../../js/getUrlParam.js"></script>
+	<script src="../../js/element.js"></script>
+	<script src="../../js/network.js"></script>
+
+	<script type="text/javascript" charset="utf-8">
+		var app = new Vue({
+			el: "#app",
+			data: {
+				curdate: '',
+				needData: {
+					"lable":''
+				},
+				AllData: [],
+				curindex: 0,
+				timer:"",
+			},
+			mounted() {
+				this.timer = setInterval(this.notityPageFunc,60000);
+			},
+			methods: {
+				notityPageFunc(){
+					let that = this
+					console.log("assaasasa")
+					++that.curindex
+					if (that.curindex > that.AllData.length) {
+						that.curindex = 0
+					}
+					that.needData = that.AllData[that.curindex]
+				},
+				initTime() {
+					let that = this
+					Network(that, 'rackinfo/getDate', "get", {}, function(res) {
+						that.curdate = res.time
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+					setInterval(function() {
+						Network(that, 'rackinfo/getDate', "get", {}, function(res) {
+							that.curdate = res.time
+						}, function(msg) {
+							that.$message.error(msg);
+						})
+					}, 60000)
+					setInterval(function() {
+						that.lodaInitData()
+					}, 420000)
+				},
+				lodaInitData() {
+					let that = this
+					Network(that, 'rackinfo/selectAllMatRack', "get", {}, function(res) {
+						console.log(res)
+						that.AllData = res.list
+						that.curindex = 0;
+						that.needData = that.AllData[that.curindex]
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+				},
+				//
+			},
+			created: function() {
+				this.initTime()
+				this.lodaInitData()
+			}
+		})
+	</script>
+</html>

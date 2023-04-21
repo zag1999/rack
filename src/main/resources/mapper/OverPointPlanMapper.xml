@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.rack.mapper.OverPointPlanMapper">
+
+    <resultMap id="BaseResultMap" type="com.jm.rack.pojo.OverPointPlan">
+            <result property="overPointSign" column="over_point_sign" jdbcType="TINYINT"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        over_point_sign
+    </sql>
+    <update id="updateOverPointSign">
+update over_point_plan
+ set over_point_sign = #{overPointSign,jdbcType=NUMERIC}
+</update>
+</mapper>

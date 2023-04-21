@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>浩亚智能科技</title>
+		<link rel="stylesheet" href="../../js/element.css">
+	</head>
+	<style>
+		html,
+		body,
+		#app {
+			padding: 0px;
+			margin: 0px;
+			min-width: 1366px;
+		}
+
+		.el-menu {
+			border-right: solid 0px #e6e6e6;
+		}
+
+		.el-menu-item.is-active {
+			background-color: #265BDD !important; //你要修改的颜色
+		}
+
+		.el-menu--horizontal>.el-menu-item.is-active {
+			border-bottom: none;
+		}
+
+		::-webkit-scrollbar {
+			display: none;
+		}
+
+		.text {
+			font-size: 16px;
+			font-weight: bold;
+		}
+
+		.item {
+			margin-bottom: 8px;
+		}
+	</style>
+	<body>
+		<div id="app">
+			<h2 style="margin:20px;">标签绑定</h2>
+			<div style="display: flex;align-items: center;margin:10px ;">
+				<h4 style="margin-left: 10px;">料架选择</h4>
+				<el-select v-model="value" placeholder="请选择" @change="updatemenu">
+					<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
+					</el-option>
+				</el-select>
+			</div>
+			<div style="width: 100%;flex-direction: row;display: flex;flex-wrap:wrap;margin-left:20px;">
+				<el-card class="box-card" v-for="(item,index) in infoData" style="width:170px;margin: 10px;">
+					<div slot="header" class="clearfix">
+						<span>{{item.name}}</span>
+						<el-button style="float: right; padding: 3px 0" type="text" @click="show(item)">编辑</el-button>
+					</div>
+					<div class="text item">入库com:{{item.comno?item.comno:''}}</div>
+					<div class="text item">位置:{{item.comchildno == -1 ?'':item.comchildno}}</div>
+					<div class="text item">出库com:{{item.tcomno?item.tcomno:''}}</div>
+					<div class="text item">位置:{{item.tcomchildno == -1 ?'':item.tcomchildno}}</div>
+				</el-card>
+			</div>
+			<el-drawer :title="codeTitle" :before-close="handleClose" :visible.sync="dialog" direction="rtl"
+				custom-class="demo-drawer" ref="drawer" size="30%" :wrapper-closable="false">
+				<el-alert title="全部输入数字" type="success">
+				</el-alert>
+				<el-form ref="form" :model="form" label-width="120px" style="margin-top: 20px;">
+					<el-form-item label="入库com口">
+						<el-input v-model="form.com1" style="width: 200px;"></el-input>
+					</el-form-item>
+					<el-form-item label="入库具体位置">
+						<el-input v-model="form.comc1" style="width: 200px;"></el-input>
+					</el-form-item>
+					<el-form-item label="出库com口">
+						<el-input v-model="form.com2" style="width: 200px;"></el-input>
+					</el-form-item>
+					<el-form-item label="出库具体位置">
+						<el-input v-model="form.comc2" style="width: 200px;"></el-input>
+					</el-form-item>
+					<el-form-item>
+						<el-button type="primary" @click="onSubmit">立即绑定</el-button>
+					</el-form-item>
+				</el-form>
+			</el-drawer>
+		</div>
+	</body>
+	<script src="../../js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/vue.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/element.js"></script>
+	<script src="../../js/network.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		var app = new Vue({
+			el: "#app",
+			data: {
+				options: [],
+				value: -1,
+				infoData: [],
+				codeTitle: '设置标签',
+				dialog: false,
+				comData: [],
+				form: {
+					com1: '',
+					comc1: '',
+					com2: '',
+					comc2: ''
+				},
+				
+				itemVlaue: {}
+			},
+			methods: {
+				show(item) {
+					this.dialog = true,
+						this.itemVlaue = item
+					this.form = {
+						com1:item.comno?item.comno:'',
+						comc1:item.comchildno == -1 ?'':item.comchildno,
+						com2:item.tcomno?item.tcomno:'',
+						comc2: item.tcomchildno == -1 ?'':item.tcomchildno
+					}
+			},
+				onSubmit() {
+					let that = this
+					if (!that.form.com1 || !that.form.comc1 || !that.form.com2 || !that.form.comc2) {
+						that.$message({
+							message: '请填写所有输入框',
+							type: 'warning'
+						});
+						return
+					}
+					let data = {
+						'id': that.itemVlaue.eid,
+						'tid': that.itemVlaue.teid,
+						'com': that.form.com1,
+						'tcom': that.form.com2,
+						'comchild': that.form.comc1,
+						'tcomchild': that.form.comc2,
+					}
+					Network(that, 'rackinfo/updateSign', "post", data, function(res) {
+						that.$message({
+							message: '修改成功',
+							type: 'success'
+						});
+						that.loadEData()
+						that.dialog = false
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+					console.log(that.itemVlaue)
+				},
+				handleClose() {
+					this.dialog = false
+				},
+				updatemenu() {
+					this.loadEData()
+				},
+				loadData() {
+					let that = this
+					Network(that, 'rackinfo/select', "GET", {}, function(res) {
+						//that.rackData = res.list
+						console.log(res)
+						let a = [{
+							value: -1,
+							label: "全部"
+						}]
+						for (var i = 0; i < res.list.length; i++) {
+							a.push({
+								value: res.list[i].infoId,
+								label: res.list[i].infoName
+							})
+						}
+						that.options = a
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+				},
+				loadEData() {
+					let that = this
+					let data = {
+						infoid: that.value
+					}
+					Network(that, 'rackinfo/getEByRackInfo', "GET", data, function(res) {
+						that.infoData = res.list
+						console.log(res.list)
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+				},
+			},
+			created: function() {
+				this.loadData()
+				this.loadEData()
+
+			}
+		})
+	</script>
+</html>

@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>浩亚智能科技</title>
+		<link rel="stylesheet" href="../../js/element.css">
+	</head>
+	<style>
+		html,
+		body,
+		#app {
+			padding: 0px;
+			margin: 0px;
+			min-width: 1366px;
+		}
+
+		.el-menu {
+			border-right: solid 0px #e6e6e6;
+		}
+
+		.el-menu-item.is-active {
+			background-color: #265BDD !important; //你要修改的颜色
+		}
+
+		.el-menu--horizontal>.el-menu-item.is-active {
+			border-bottom: none;
+		}
+
+		::-webkit-scrollbar {
+			display: none;
+		}
+	</style>
+	<body>
+		<div id="app" >
+			<h2 style="margin:10px;">补货记录</h2>
+			<div style="display: flex;align-items: center;margin:10px ;">
+				<h4 style="margin-right: 10px;">料位选择</h4>
+				<el-select v-model="value" placeholder="请选择" @change="changeNo">
+					<el-option-group v-for="group in options" :key="group.label" :label="group.label">
+						<el-option v-for="item in group.options" :key="item.label" :label="item.label"
+							:value="item.label">
+						</el-option>
+					</el-option-group>
+				</el-select>
+			</div>
+			<el-table :data="tableData" style="width: 100%" stripe>
+				<el-table-column type="index" label="序号" width="150" align="center">
+					</el-table-column>
+					<el-table-column prop="matname" label="物料名称" width="180">
+					</el-table-column>
+					<el-table-column prop="matcode" label="物料编码" width="180">
+					</el-table-column>
+					<el-table-column prop="matcountFront" label="入库前数量" width="180">
+					</el-table-column>
+					<el-table-column prop="matcountAdd" label="入库数" width="180">
+					</el-table-column>
+					<el-table-column prop="matcountLast" label="当前数量" width="180">
+					</el-table-column>
+					<el-table-column prop="rackname" label="所在料架" width="180">
+					</el-table-column>
+					<el-table-column prop="rackmatno" label="所在料位" width="180">
+					</el-table-column>
+					<el-table-column prop="staffname" label="操作人" width="180">
+					</el-table-column>
+					<el-table-column prop="createtime" label="入库日期" >
+					</el-table-column>
+			</el-table>
+			<el-pagination v-if="totalCount!=0" style="margin:20px;" @size-change="handleSizeChange"
+				@current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30]"
+				:page-size="pageSize" layout="total, sizes, prev, pager, next, jumper" :total="totalCount">
+			</el-pagination>
+		</div>
+	</body>
+	<script src="../../js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/vue.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/element.js"></script>
+	<script src="../../js/network.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		var app = new Vue({
+			el: "#app",
+			data: {
+				options: [],
+				value: '全部',
+				tableData: [],
+				totalCount: 0,
+				currentPage: 1,
+				pageSize:10
+			},
+			methods: {
+				handleSizeChange(val) {
+					this.pageSize = val
+					this.loadDataList()
+				},
+				handleCurrentChange(val) {
+					this.currentPage = val
+					this.loadDataList()
+				},
+				changeNo() {
+					let that = this
+					that.currentPage = 1
+					that.loadDataList()
+				},
+				loadData() {
+					let that = this
+					Network(that, 'rackinfo/seletByParent', "GET", {}, function(res) {
+						res.list.unshift({
+							"label":"全部",
+							"options":[
+								{"label":"全部"}
+							]
+						})
+						that.options = res.list				
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+				},
+				loadDataList(){
+					let that = this
+					let str = ""
+					if(that.value != "全部"){
+						str = that.value 
+					}
+					let data = {
+						"curpage":that.currentPage,
+						"size":that.pageSize,
+						"rackInfoNo":str
+					}
+					Network(that, 'matreplenish/selectByPage', "GET", data, function(res) {
+						for (var i = 0; i < res.list.length; i++) {
+							res.list[i].createtime = UTCtoDate(res.list[i].createtime, "")
+						}
+						that.tableData = res.list
+						that.totalCount = parseInt(res.total)
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+				}
+			},
+			created: function() {
+				this.loadData()
+				this.loadDataList()
+			}
+		})
+	</script>
+</html>

@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.rack.mapper.MesPlanMapper">
+
+    <resultMap id="BaseResultMap" type="com.jm.rack.pojo.MesPlan">
+            <id property="iid" column="iID" jdbcType="INTEGER"/>
+            <result property="psn" column="PSN" jdbcType="INTEGER"/>
+            <result property="planno" column="PlanNo" jdbcType="VARCHAR"/>
+            <result property="workshop" column="WorkShop" jdbcType="VARCHAR"/>
+            <result property="lineno" column="LineNo" jdbcType="VARCHAR"/>
+            <result property="linename" column="LineName" jdbcType="VARCHAR"/>
+            <result property="productdate" column="ProductDate" jdbcType="TIMESTAMP"/>
+            <result property="shift" column="Shift" jdbcType="VARCHAR"/>
+            <result property="flag" column="flag" jdbcType="INTEGER"/>
+            <result property="isgujia" column="isgujia" jdbcType="INTEGER"/>
+            <result property="createtime" column="CreateTime" jdbcType="TIMESTAMP"/>
+            <result property="createuser" column="CreateUser" jdbcType="VARCHAR"/>
+            <result property="updatetime" column="UpdateTime" jdbcType="TIMESTAMP"/>
+            <result property="updateuser" column="UpdateUser" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        iID,PSN,PlanNo,
+        WorkShop,LineNo,LineName,
+        ProductDate,Shift,flag,
+        isgujia,CreateTime,CreateUser,
+        UpdateTime,UpdateUser
+    </sql>
+    <select id="selectMesPlanByLineName" parameterType="java.util.Map" resultMap="BaseResultMap">
+        SELECT iid,psn,planno,workshop,[lineno],linename,productdate,shift,flag,isgujia,createtime,createuser,updatetime,updateuser FROM Mes_Plan
+        WHERE [LineNo] = #{lineno} AND  ProductDate &gt;=  #{time} ORDER BY [PlanNo] ASC
+    </select>
+</mapper>

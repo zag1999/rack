@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>浩亚智能科技</title>
+		<link rel="stylesheet" href="../../js/element.css">
+	</head>
+	<style>
+		html,
+		body,
+		#app {
+			padding: 0px;
+			margin: 0px;
+			min-width: 1366px;
+		}
+
+		.el-menu {
+			border-right: solid 0px #e6e6e6;
+		}
+
+		.el-menu-item.is-active {
+			background-color: #265BDD !important; //你要修改的颜色
+		}
+
+		.el-menu--horizontal>.el-menu-item.is-active {
+			border-bottom: none;
+		}
+
+		::-webkit-scrollbar {
+			display: none;
+		}
+
+		.el-drawer__header {
+			-webkit-box-align: center;
+			-ms-flex-align: center;
+			align-items: center;
+			font-weight: bold;
+			color: #000000;
+			display: flex;
+			margin-bottom: 32px;
+			padding: 20px 20px 0;
+		}
+	</style>
+	<body>
+		<div id="app">
+			<div style="display: flex;align-items: center;justify-content: space-between;">
+				<h2 style="margin:20px;">料架设置</h2>
+				<div style="display: flex;">
+					<el-button type="primary" style="margin:20px;" @click="show()">新增料架</el-button>
+					<el-button type="primary" style="margin:20px;" @click="excel()">导入物料excel.xls</el-button>
+				</div>
+			</div>
+			<el-row>
+				<el-col :span="6" v-for="(item,index) in rackData">
+					<div style="display: flex;background-color: aliceblue;margin: 10px;">
+						<div style="display: flex;justify-content:space-between;width: 100%;align-items: center;">
+							<h3 style="margin-left: 10px;">{{item.infoName}}</h3>
+							<span style="font-size: 14px;">{{item.currow}}行*{{item.columns}}列</span>
+							<el-dropdown style="color: #265BDD;">
+								<el-button type="primary">
+									操作<i class="el-icon-arrow-down el-icon--right"></i>
+								</el-button>
+								<el-dropdown-menu slot="dropdown">
+									<el-dropdown-item @click.native="showracks(item)">显示料位</el-dropdown-item>
+									<el-dropdown-item @click.native="show(item)">修改料架</el-dropdown-item>
+									<el-dropdown-item @click.native="deleterack(item)">删除料架</el-dropdown-item>
+								</el-dropdown-menu>
+							</el-dropdown>
+
+						</div>
+					</div>
+				</el-col>
+			</el-row>
+			<el-empty v-if="rackData.length==0" description="暂无数据"></el-empty>
+
+
+			<!-- 新增 -->
+			<el-drawer :title="title" :before-close="handleClose" :visible.sync="dialog" direction="ltr"
+				custom-class="demo-drawer" ref="drawer">
+				<div>
+					<el-form :model="form" class="demo-ruleForm" style="margin-left: 10px;">
+						<el-form-item label="料架名称" :label-width="formLabelWidth">
+							<el-input style="width:80%" v-model="form.infoName" autocomplete="off">
+							</el-input>
+						</el-form-item>
+						<el-form-item label="行数" :label-width="formLabelWidth">
+							<el-input type="number" style="width:80%" v-model="form.currow" autocomplete="off">
+							</el-input>
+						</el-form-item>
+						<el-form-item label="列数" :label-width="formLabelWidth">
+							<el-input type="number" style="width:80%" v-model="form.columns" autocomplete="off">
+							</el-input>
+						</el-form-item>
+					</el-form>
+					<div>
+						<el-button @click="dialog = false" style="margin-left: 40px;">取 消</el-button>
+						<el-button type="primary" @click="insert()">
+							确 定
+						</el-button>
+					</div>
+				</div>
+			</el-drawer>
+
+			<el-drawer :title="racktitle" :before-close="handleClose1" :visible.sync="dialog1" direction="btt"
+				custom-class="demo-drawer" ref="drawer" size="80%" :wrapper-closable="false">
+				<div style="display: flex;position: absolute;top:22px;left:80px;">
+					<span style="color: red;margin-left: 20px;">红色：未设置</span>
+					<span style="color: green;margin-left: 20px;">绿色：设置</span>
+				</div>
+				<div style="width: 100%;flex-direction: row;display: flex;flex-wrap:wrap;">
+					<div v-for="(item,index) in infoData" :style="{width:needWidth}">
+						<el-collapse>
+							<el-collapse-item :title="item.matno">
+								<template slot="title">
+									<h3 :style="{color:item.child.length===0 ? 'red' : 'green'}">{{item.matno}}({{item.child.length}})</h3>
+								</template>
+								<div
+									style="display: flex;justify-content: space-between;margin: 10px;align-items: center;">
+									<div style="font-size:18px;">物料类型数:{{item.child.length}}</div>
+									<el-button type="primary" size="small" round @click="insertmat(item)">添加物料</el-button>
+								</div>
+								<div v-for="(item1,index) in item.child">
+									<el-card class="box-card">
+										<div style="display: flex;justify-content: end;">
+										 <el-button type="danger" icon="el-icon-delete" @click = "deleteRackMat(item1)" circle size="mini"></el-button>	
+										</div>
+										<div style="font-size: 16px;">
+											物料编码:{{item1.code}}
+										</div>
+										<div style="font-size: 16px;margin-top: 10px;">
+											物料名称:{{item1.name}}
+										</div >
+										<div style="font-size: 16px;margin-top: 10px;">
+											物料数量:{{item1.matnum}}
+										</div>
+										<div style="font-size: 16px;display: flex;justify-content: space-between;margin-top: 10px;">
+											<span>语音提示警戒值:{{item1.matmin}}</span>
+											<el-button type="primary" icon="el-icon-edit" circle size="mini" @click="updateMin(item1)"></el-button>	
+										</div>
+										<div style="font-size: 16px;display: flex;justify-content: space-between;margin-top: 10px;">
+											<span>物料存储最大数:{{item1.matmax}}</span>
+											<el-button type="primary" icon="el-icon-edit" circle size="mini" @click="updateMax(item1)"></el-button>	
+										</div>
+									</el-card>
+
+								</div>
+
+							</el-collapse-item>
+						</el-collapse>
+					</div>
+				</div>
+			</el-drawer>
+
+			<!-- 新增料架物料 -->
+			<el-drawer :title="rackMatForm.rackno" :before-close="handleClose3" :visible.sync="dialog3" direction="rtl"
+				custom-class="demo-drawer" ref="drawer" size="30%" :wrapper-closable="false">
+				<div style="display: flex;align-items: center;">
+					<span style="margin-left: 10px;margin-right: 10px;width: 80px;">物料设置</span>
+					<el-select v-model="codeValue" filterable placeholder="请选择" style="width:70%;">
+						<el-option v-for="(item,index) in codeArray" :key="item.matno"
+							@click.native="selectCode(index,item)" :label="`${item.matname}\,${item.matno}`"
+							:value="item.matno">
+						</el-option>
+					</el-select>
+				</div>
+				<div style="display: flex;align-items: center;margin-top: 15px;">
+					<span style="margin-left: 10px;margin-right: 10px;width: 80px;">警戒值</span>
+					<el-input style="width:30%;" v-model="rackMatForm.matmin" placeholder="请输入警戒值"></el-input>
+				</div>
+				<div style="display: flex;align-items: center;margin-top: 15px;">
+					<span style="margin-left: 10px;margin-right: 10px;width: 80px;">最大值</span>
+					<el-input  style="width:30%;" v-model="rackMatForm.matmax" placeholder="请输入警戒值"></el-input>
+				</div>
+				<el-button @click="updateCode" type="primary" style="margin-top:40px;margin-left: 10px;">
+					确认设置
+				</el-button>
+			</el-drawer>
+
+		</div>
+	</body>
+	<script src="../../js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/vue.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/element.js"></script>
+	<script src="../../js/network.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		var app = new Vue({
+			el: "#app",
+			data: {
+				level: 0,
+				uid: '',
+				rackData: [],
+				dialog: false,
+				title: '新增料架',
+				form: {
+					infoName: '',
+					currow: 0,
+					columns: 0
+				},
+				formLabelWidth: '120px',
+				racktitle: '',
+				dialog1: false,
+				needWidth: 0,
+				infoData: [],
+				codeTitle: '',
+				dialog2: false,
+				codeValue: '',
+				codeName: '',
+				curindex: -1,
+				codeArray: [],
+				rackTitle:'',
+				dialog3: false,
+				rackMatForm:{
+					rackno:'',
+					code:'',
+					name:'',
+					matnum:'',
+					matmax:'',
+					matmin:''
+				},
+				rackitem:{}
+			},
+			methods: {
+				//插入料架物料框-------
+				insertmat(item){
+					this.rackMatForm.rackno =  item.matno
+					
+					this.dialog3 = true
+				},
+				handleClose3() {
+					this.rackMatForm = {
+						rackno:'',
+						code:'',
+						name:'',
+						matnum:0,
+						matmax:'',
+						matmin:''
+					}
+				
+					this.dialog3 = false
+				},
+				selectCode(index, item) {
+					console.log(index, item)
+					this.codeValue = item.matno
+					this.codeName = item.matname
+				},
+				updateCode() {
+					let that = this
+					if (!that.codeValue) {
+						that.$message({
+							message: "未选择物料",
+							type: 'warning'
+						});
+						return
+					}
+					that.rackMatForm.code =  this.codeValue
+					that.rackMatForm.name = this.codeName
+					that.rackMatForm.matnum = 0
+					Network(that, 'material/insertMatRack', "GET", that.rackMatForm, function(res) {
+						that.showracks(that.rackitem)
+						that.$message({
+							type: 'success',
+							message: '成功'
+						});
+						that.rackMatForm = {
+							rackno:'',
+							code:'',
+							name:'',
+							matnum:0,
+							matmax:'',
+							matmin:''
+						}
+						that.codeValue = ""
+						that.dialog3 = false
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+				
+				},
+			    deleteRackMat(item){
+					console.log(item)
+					let that = this
+					that.$confirm('此操作将会删除此物料', '', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+				        
+						Network(that, 'material/delMatRack', "GET", {"mrid":item.mrid}, function(res) {
+							that.$message({
+								type: 'success',
+								message: '成功'
+							});
+							that.showracks(that.rackitem)
+						}, function(msg) {
+							that.$message.error(msg);
+						})
+					}).catch(() => {});
+					//delMatRack
+				},
+				updateMax(item) {
+					let that = this
+					that.$prompt('请输入最大数', item.name, {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						inputPattern: /^\d+$/,
+						inputErrorMessage: '格式不正确',
+						inputValue: item.matmax
+					}).then(({
+						value
+					}) => {
+						let data = {
+							"mrid": item.mrid,
+							"matmax": value
+						}
+						Network(that, 'material/update', "GET", data, function(res) {
+							that.showracks(that.rackitem)
+							that.$message({
+								type: 'success',
+								message: '修改成功'
+							});
+						}, function(msg) {
+							that.$message.error(msg);
+						})
+					}).catch(() => {
+						that.$message({
+							type: 'info',
+							message: '取消输入'
+						});
+					});
+				},
+				updateMin(item) {
+					let that = this
+					that.$prompt('请输入补货提示数', item.name, {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						inputPattern: /^\d+$/,
+						inputErrorMessage: '格式不正确',
+						inputValue: item.matmin
+					}).then(({
+						value
+					}) => {
+						let data = {
+							"mrid": item.mrid,
+							"matmin": value
+						}
+						Network(that, 'material/update', "GET", data, function(res) {
+							that.showracks(that.rackitem)
+							that.$message({
+								type: 'success',
+								message: '修改成功'
+							});
+						}, function(msg) {
+							that.$message.error(msg);
+						})
+					}).catch(() => {
+						that.$message({
+							type: 'info',
+							message: '取消输入'
+						});
+					});
+				},
+				excel(){
+					let that = this
+					that.$prompt('请输入文件地址',"上传数据", {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+					}).then(({
+						value
+					}) => {
+					
+						if(!value){
+							that.$message({
+								type: 'warning',
+								message: '请输入地址'
+							});
+							return
+						}
+						let data = {
+							"file": value
+						}
+						Network(that, 'material/importDataByExcel', "GET", data, function(res) {
+							
+							that.$message({
+								type: 'success',
+								message: '导入成功'
+							});
+						}, function(msg) {
+							that.$message.error(msg);
+						})
+					}).catch(() => {
+						that.$message({
+							type: 'info',
+							message: '取消输入'
+						});
+					});
+				},
+				//插入料架物料框------------
+				handleClose2() {
+					this.codeValue = ''
+					this.codeName = ''
+					this.dialog2 = false
+				},
+				updateMatcode(index, item) {
+					this.dialog2 = true
+					this.curindex = index
+					this.codeTitle = item.matno
+					console.log(index, item)
+				},
+				handleClose1() {
+					this.dialog1 = false
+				},
+				/* 加载对应的料架详情 */
+				showracks(item) {
+					let that = this
+					that.rackitem = item;
+					that.racktitle = item.infoName
+					that.needWidth = 100 / item.columns + "%"
+					//加载相关的物料
+					let data = {
+						"id": item.infoId
+					}
+					Network(that, 'material/selectAllBycode', "GET", data, function(res) {
+						console.log(res)
+						for (var i = 0; i < res.list.length; i++) {
+							let item = res.list[i]
+							item.fontcolor = '#ffffff'
+							if (item.matcount == 0) {
+								item.color = 'white'
+								item.fontcolor = '#000000'
+							} else if (item.matcount > 0 && item.matcount < item.mintips) {
+								item.color = '#F56C6C'
+							} else if (item.matcount >= item.mintips && item.matcount < item.maxstore) {
+								item.color = '#E6A23C'
+							} else {
+								item.color = '#67C23A'
+							}
+						}
+						that.infoData = res.list
+						that.dialog1 = true
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+				},
+				deleterack(item) {
+					let that = this
+					that.$confirm('此操作将会删除料架', '慎重删除', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						let data = {
+							"id": item.infoId
+						}
+						Network(that, 'rackinfo/delete', "GET", data, function(res) {
+							console.log(res)
+							that.$message({
+								message: "删除成功",
+								type: 'success'
+							});
+							that.loadData()
+						}, function(msg) {
+							that.$message.error(msg);
+						})
+					}).catch(() => {});
+				},
+				insert() {
+					let that = this
+					if (!that.form.infoName) {
+						that.$message({
+							message: '请输入料架名称',
+							type: 'warning'
+						});
+						return
+					}
+					if (!that.form.currow && that.form.currow > 0) {
+						that.$message({
+							message: '请输入行数',
+							type: 'warning'
+						});
+						return
+					}
+					if (!that.form.columns && that.form.columns > 0) {
+						that.$message({
+							message: '请输入列数',
+							type: 'warning'
+						});
+						return
+					}
+					let urlStr = 'insert'
+					let data = {}
+					if (that.form.infoId) {
+						urlStr = 'update'
+						data = {
+							infoName: that.form.infoName,
+							currow: that.form.currow,
+							columns: that.form.columns,
+							infoId: that.form.infoId
+						}
+						that.$confirm('此操作将会清除之前的料位设置', '慎重修改', {
+							confirmButtonText: '确定',
+							cancelButtonText: '取消',
+							type: 'warning'
+						}).then(() => {
+							Network(that, 'rackinfo/update', "GET", data, function(res) {
+								console.log(res)
+								that.$message({
+									message: "新增成功",
+									type: 'success'
+								});
+								that.dialog = false
+								that.loadData()
+							}, function(msg) {
+								that.$message.error(msg);
+							})
+						}).catch(() => {
+
+						});
+
+					} else {
+						data = that.form
+						Network(that, 'rackinfo/insert', "GET", data, function(res) {
+							console.log(res)
+							that.$message({
+								message: "新增成功",
+								type: 'success'
+							});
+							that.dialog = false
+							that.loadData()
+						}, function(msg) {
+							that.$message.error(msg);
+						})
+					}
+
+				},
+				handleClose() {
+					this.dialog = false
+				},
+				show(item) {
+					console.log(item)
+					if (item) {
+						this.title = "修改料架"
+						this.form = item
+					} else {
+						this.title = "新增料架"
+						this.form = {
+							infoName: '',
+							currow: 0,
+							columns: 0
+						}
+
+					}
+					this.dialog = true
+				},
+				loadData() {
+					let that = this
+					Network(that, 'rackinfo/select', "GET", {}, function(res) {
+						that.rackData = res.list
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+				},
+				loadMatData() {
+					let that = this
+					Network(that, 'Aamaterial/select', "GET", {}, function(res) {
+						that.codeArray = res.list
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+				}
+
+
+
+			},
+			created: function() {
+				this.uid = localStorage.getItem("uid")
+				this.level = localStorage.getItem("level")
+				this.loadData()
+				this.loadMatData()
+			}
+		})
+	</script>
+</html>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.jm.rack.fl.storeOperate.mapper.StoreOperateMapper">
+    <select id="selectStovePlcDataByPlanId" resultType="com.jm.rack.fl.storeOperate.po.StoveAndPlcPo">
+        select mat_info.matid, mat_info.quantity, rack_info.matnum, rack_info.matmax, rack_info.matmin, sign.*
+        from plan_mat_info mat_info
+                 left join mat_rack_info rack_info on mat_info.matno = rack_info.code
+                 left join e_sign sign on rack_info.rackno = sign.matno
+        where mat_info.planid = #{planId}
+          and rack_info.mrid is not null
+          and sign.eid is not NULL
+          and sign.stocksign = 0
+    </select>
+
+    <select id="selectTakeOutPlcDataByPlanId" resultType="com.jm.rack.fl.storeOperate.po.StoveAndPlcPo">
+        select mat_info.matid, mat_info.quantity, rack_info.matnum, rack_info.matmax, rack_info.matmin, sign.*
+        from plan_mat_info mat_info
+             left join mat_rack_info rack_info on mat_info.matno = rack_info.code
+             left join e_sign sign on rack_info.rackno = sign.matno
+        where mat_info.planid = #{planId}
+          and rack_info.mrid is not null
+          and sign.eid is not NULL
+          and sign.stocksign = 1
+    </select>
+
+    <select id="selectTakeOutPlcDataByMatno" resultType="com.jm.rack.fl.storeOperate.po.StoveAndPlcPo">
+        select mat_info.matid, mat_info.quantity, rack_info.matnum, rack_info.matmax, rack_info.matmin, sign.*
+        from plan_mat_info mat_info
+                 left join mat_rack_info rack_info on mat_info.matno = rack_info.code
+                 left join e_sign sign on rack_info.rackno = sign.matno
+        where sign.matno in
+        <foreach collection="list" item="item" open="(" close=")" separator=",">
+            #{item}
+        </foreach>
+        and rack_info.mrid is not null
+        and sign.eid is not NULL
+        and sign.stocksign = 1
+    </select>
+
+    <select id="selectStovePlcDataAll" resultType="com.jm.rack.fl.storeOperate.po.StoveAndPlcPo">
+        select rack_info.matnum, rack_info.matmax, rack_info.matmin, sign.*
+        from mat_rack_info rack_info
+                 inner join e_sign sign on rack_info.rackno = sign.matno
+        where sign.stocksign = 0
+    </select>
+</mapper>

@@ -1,0 +1,337 @@
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>DataV</title>
+		
+		<link rel="stylesheet" href="js/element.css">
+		<script src="js/vue.js"></script>
+		<!--调试版-->
+		<script src="js/datav.js"></script>
+
+		<!--压缩版 生产版本-->
+		<!-- <script src="https://unpkg.com/@jiaminghi/data-view/dist/datav.min.vue.js"></script> -->
+		<style>
+			html,
+			body,
+			#app {
+				width: 100%;
+				height: 100%;
+				margin: 0px;
+				padding: 0px;
+				background-color: white;
+				overflow: hidden;
+			}
+
+			.border-box-content {
+				color: white;
+				font-size: 20px;
+				font-weight: bold;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+			}
+
+			.style {
+				display: flex;
+				flex-direction: column;
+				justify-content: space-between;
+			}
+
+			.style1 {
+				font-size: 16px;
+				text-align: center;
+				margin: 10px;
+			}
+
+			.style2 {
+				font-size: 18px;
+				text-align: center;
+				margin: 10px;
+			}
+
+			.image1 {
+				width: 100%;
+				height: 18%;
+			}
+
+			.dv-scroll-board .rows .ceil {
+				padding: 0 10px;
+				box-sizing: border-box;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				font-size: 18px;
+			}
+
+			.dv-scroll-board .header .header-item {
+				padding: 0 10px;
+				box-sizing: border-box;
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				transition: all 0.3s;
+				font-size: 20px;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app" style="display: flex;flex-direction: column;align-items: center;">
+			<div>
+				<span>com口：</span>
+				<el-input v-model="com" placeholder="请输入第几个com口" style="width: 300px;margin-top: 20px;"></el-input>
+			</div>
+			<div>
+				<span>com口下的第几个：</span>
+				<el-input v-model="comchild" placeholder="请输入com口第几个"  style="width: 300px;margin-top: 20px;margin-bottom: 20px;"></el-input>
+			</div>
+			<div>
+				<span>数量：</span>
+				<el-input v-model="count" placeholder="请输入com口第几个"  style="width: 300px;margin-top: 20px;margin-bottom: 20px;"></el-input>
+			</div>
+			
+			<div>
+				<span>颜色：</span>
+				<el-select v-model="value" placeholder="请选择">
+				    <el-option
+				      v-for="item in options"
+				      :key="item.value"
+				      :label="item.label"
+				      :value="item.value">
+				    </el-option>
+				  </el-select>
+			</div>
+	        <el-button @click = "open">测试开灯</el-button>
+			
+			<div>
+				<span>com口：</span>
+				<el-input v-model="com1" placeholder="请输入第几个com口" style="width: 300px;margin-top: 20px;"></el-input>
+			</div>
+			<div>
+				<span>com口下的第几个：</span>
+				<el-input v-model="comchild1" placeholder="请输入com口第几个"  style="width: 300px;margin-top: 20px;margin-bottom: 20px;"></el-input>
+			</div>
+			
+			<el-button @click = "close">测试关灯</el-button>
+			
+			
+			<el-button @click = "closeLight(1)">开红灯</el-button>
+			<el-button @click = "closeLight(2)">开黄灯</el-button>
+			<el-button @click = "closeLight(3)">开绿灯</el-button>
+			<el-button @click = "closeLight(4)">关灯</el-button>
+			<el-button @click = "closeLight111()">测试拍灯</el-button>
+			
+		</div>
+		<script src="js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+		<script src="js/element.js"></script>
+		<script src="js/network.js"></script>
+		<script src="js/echarts.js"></script>
+		<script type="text/javascript" charset="utf-8">
+			var app = new Vue({
+				el: "#app",
+				data: {
+					timeout: 28 * 1000, //30秒一次心跳
+					timeoutObj: null, //心跳心跳倒计时
+					serverTimeoutObj: null, //心跳倒计时
+					timeoutnum: null, //断开 重连倒计时
+					websocket: null,
+					com:'',
+					comchild:'',
+					count:'',
+					value:'',
+					 options: [{
+					          value: '绿',
+					          label: '绿'
+					        }, {
+					          value: '蓝',
+					          label: '蓝'
+					        }, {
+					          value: '黄',
+					          label: '黄'
+					        }],
+					com1:'',
+					comchild1:'',
+
+				},
+				methods: {
+					closeLight(item){
+					   	let data = {
+					   		"type":'50',
+					   	}
+					   	this.websocketsend(JSON.stringify(data));
+					},
+					closeLight111(){
+					  console.log(this.com1)
+			
+							  let data = {
+							  	"type":'6',
+							  	"com":"com"+this.com1,
+								"comchild":this.comchild1
+							  }
+							  this.websocketsend(JSON.stringify(data));
+					},
+					open(){
+						let that = this 
+						if(!that.com){
+							that.$message({
+								message: '请输入com口',
+								type: 'warning'
+							});
+							return
+						}
+						if(!that.comchild){
+							that.$message({
+								message: '请输入第几个',
+								type: 'warning'
+							});
+							return
+						}
+						if(!that.count){
+							that.$message({
+								message: '请输入显示数量',
+								type: 'warning'
+							});
+							return
+						}
+						if(!that.value){
+							that.$message({
+								message: '请选择颜色',
+								type: 'warning'
+							});
+							return
+						}
+						let data = {
+							"type":'50',
+							"com":that.com,
+							"comchild":that.comchild,
+							"count":that.count,
+							"color":that.value
+						}
+						this.websocketsend(JSON.stringify(data));
+					},
+					close(){
+						let that = this
+						if(!that.com1){
+							that.$message({
+								message: '请输入com口',
+								type: 'warning'
+							});
+							return
+						}
+						if(!that.comchild1){
+							that.$message({
+								message: '请输入第几个',
+								type: 'warning'
+							});
+							return
+						}
+						let data = {
+							"type":'51',
+							"com":that.com1,
+							"comchild":that.comchild1,
+						}
+						this.websocketsend(JSON.stringify(data));
+					},
+					initWebSocket() {
+						
+						const url = 'ws://10.57.31.99:8088/websocket/test'
+						this.websocket = new WebSocket(url)
+						// 连接错误
+						this.websocket.onerror = this.setErrorMessage
+
+						// 连接成功
+						this.websocket.onopen = this.setOnopenMessage
+
+						// 收到消息的回调
+						this.websocket.onmessage = this.setOnmessageMessage
+
+						// 连接关闭的回调
+						this.websocket.onclose = this.setOncloseMessage
+
+						// 监听窗口关闭事件，当窗口关闭时，主动去关闭websocket连接，防止连接还没断开就关闭窗口，server端会抛异常。
+						window.onbeforeunload = this.onbeforeunload
+					},
+					reconnect() { // 重新连接
+						if (this.lockReconnect) return;
+						this.lockReconnect = true;
+						//没连接上会一直重连，设置延迟避免请求过多
+						this.timeoutnum && clearTimeout(this.timeoutnum);
+						this.timeoutnum = setTimeout(() => {
+							//新连接
+							this.initWebSocket();
+							this.lockReconnect = false;
+						}, 5000);
+					},
+					reset() { // 重置心跳
+						// 清除时间
+						clearTimeout(this.timeoutObj);
+						clearTimeout(this.serverTimeoutObj);
+						// 重启心跳
+						this.start();
+					},
+					start() { // 开启心跳
+						this.timeoutObj && clearTimeout(this.timeoutObj);
+						this.serverTimeoutObj && clearTimeout(this.serverTimeoutObj);
+						this.timeoutObj = setTimeout(() => {
+							// 这里发送一个心跳，后端收到后，返回一个心跳消息，
+							if (this.websocket && this.websocket.readyState == 1) { // 如果连接正常
+								this.websocketsend('heartbeat');
+							} else { // 否则重连
+								this.reconnect();
+							}
+							this.serverTimeoutObj = setTimeout(() => {
+								//超时关闭
+								this.websocket.close();
+							}, this.timeout);
+
+						}, this.timeout)
+					},
+					setOnmessageMessage(event) {
+						let that = this
+						let obj = JSON.parse(event.data);
+						console.log(obj)
+						// console.log("接收到的"+obj.type)
+						// console.log("接收到的"+obj.content)
+						// let a = obj.content
+						// for (var i = 0; i < a.length; i++) {
+						// 	console.log(a[i].count)
+						// }
+						switch (obj.type) {
+							case 'heartbeat':
+								//收到服务器信息，心跳重置
+								this.reset();
+								break;}
+					},
+					setErrorMessage() {
+						//重连
+						this.reconnect();
+						console.log("WebSocket连接发生错误" + '   状态码：' + this.websocket.readyState)
+					},
+					setOnopenMessage() {
+						//开启心跳
+						this.start();
+						console.log("WebSocket连接成功" + '   状态码：' + this.websocket.readyState)
+					},
+					setOncloseMessage() {
+						//重连
+						this.reconnect();
+						console.log("WebSocket连接关闭" + '   状态码：' + this.websocket.readyState)
+					},
+					onbeforeunload() {
+						this.closeWebSocket();
+					},
+					//websocket发送消息
+					websocketsend(messsage) {
+						this.websocket.send(messsage)
+					},
+					closeWebSocket() { // 关闭websocket
+						this.websocket.close()
+					},
+				},
+				created: function() {
+					let that = this
+					this.initWebSocket()
+				},
+			})
+		</script>
+	</body>
+</html>

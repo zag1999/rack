@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8">
+		<title>计划设置</title>
+		<link rel="stylesheet" href="../../js/element.css">
+	</head>
+	<style>
+		html,
+		body,
+		#app {
+			padding: 0px;
+			margin: 0px;
+			min-width: 1366px;
+		}
+
+		.state0 {
+			color: #000000;
+		}
+
+		.state1 {
+			color: #E6A23C;
+		}
+
+		.state2 {
+			color: #67C23A;
+		}
+
+		.el-dropdown-link {
+			cursor: pointer;
+			color: #409EFF;
+		}
+
+		.el-icon-arrow-down {
+			font-size: 12px;
+		}
+
+		.box {
+			width: 400px;
+
+			.top {
+				text-align: center;
+			}
+
+			.left {
+				float: left;
+				width: 60px;
+			}
+	</style>
+	<body>
+		<div id="app">
+
+			<div style="display: flex;align-items: center;">
+				<h2 style="margin-top:20px;margin-left: 20px;">计划调整</h2>
+				<el-switch style="margin-left: 20px;" v-model="planValue" active-text="过点计划" inactive-text="普通计划">
+				</el-switch>
+				<span style="margin-left:50px;">调整计划</span>
+				<el-switch style="margin-left:20px;" v-model="setUpValue" active-color="#13ce66"
+					inactive-color="#ff4949" @change='updateplanstate'>
+				</el-switch>
+			</div>
+			<div style="display: flex;align-items: center;">
+				<el-select @change='lineupdate' v-model="lineValue" placeholder="请选择线体" style="margin-left: 20px;">
+					<el-option v-for="item in LineList" :key="item.value" :label="item.label" :value="item.value">
+					</el-option>
+				</el-select>
+				<el-select filterable @change='plannoupdate' v-model="planNoValue" placeholder="请选择计划号"
+					style="margin-left: 20px;">
+					<el-option v-for="item in planNoList" :key="item.planno" :label="item.planno" :value="item.planno">
+					</el-option>
+				</el-select>
+				<el-button type="success" style="margin-left:50px;" @click="updateBatch(2)">批量完成</el-button>
+				<el-button type="danger" style="margin-left:50px;" @click="updateBatch(0)">批量未完成</el-button>
+			</div>
+
+			<div style="display: flex;align-items: center;">
+				<el-table ref="multipleTable" :data="tableData" style="width: 100%"
+					@selection-change="handleSelectionChange">
+					<el-table-column type="selection" width="55">
+					</el-table-column>
+					<el-table-column prop="logicNo" width="100" label="序号">
+					</el-table-column>
+					<el-table-column prop="planno" label="计划号">
+					</el-table-column>
+					<el-table-column prop="lineTypeText" label="线体" width="100">
+					</el-table-column>
+					<el-table-column prop="proname" label="产品名称">
+					</el-table-column>
+					<el-table-column prop="prono" label="产品编码">
+					</el-table-column>
+					<el-table-column prop="carvin" label="carvin">
+					</el-table-column>
+					<el-table-column prop="cartype" label="车类型" width="100">
+					</el-table-column>
+					<el-table-column prop="time" label="过点时间" width="200">
+					</el-table-column>
+					<el-table-column prop="strsText" label="状态" width="100">
+						<template slot-scope="scope">
+							<span :class="[scope.row.colorState]">{{scope.row.strsText}}</span>
+						</template>
+					</el-table-column>
+					<el-table-column label="编辑">
+						<template slot-scope="scope">
+							<el-dropdown>
+								<span class="el-dropdown-link">
+									状态<i class="el-icon-arrow-down el-icon--right"></i>
+								</span>
+								<el-dropdown-menu slot="dropdown">
+									<el-dropdown-item @click.native='updateState(scope.$index,scope.row.planId,0)'>未开始
+									</el-dropdown-item>
+									<el-dropdown-item @click.native='updateState(scope.$index,scope.row.planId,2)'>已完成
+									</el-dropdown-item>
+								</el-dropdown-menu>
+							</el-dropdown>
+							<el-tooltip class="item" effect="dark" content="计划第一条时间设置后其它数据时间自动修改,其它只修改自己"
+								placement="top-end">
+								<el-button @click.native="updatetime(scope.$index,scope.row.planId,scope.row.planno)"
+									type="primary" size="mini" round v-show="!scope.row.carvin"
+									style="width: 100px;margin-left: 20px;">过点时间</el-button>
+							</el-tooltip>
+						</template>
+					</el-table-column>
+				</el-table>
+			</div>
+		</div>
+	</body>
+	<script src="../../js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/vue.js" type="text/javascript" charset="utf-8"></script>
+	<script src="../../js/element.js"></script>
+	<script src="../../js/network.js"></script>
+	<script type="text/javascript" charset="utf-8">
+		var app = new Vue({
+			el: "#app",
+			data: {
+				tableData: [],
+				multipleSelection: [],
+				planChooseList: [],
+				planValue: false,
+				setUpValue: false,
+				LineList: [{
+						'label': '前排',
+						'value': 6283
+					},
+					{
+						'label': '中排',
+						'value': 6285
+					},
+					{
+						'label': '三排',
+						'value': 6287
+					}
+				],
+				planNoList: [],
+				lineValue: 6283,
+				planNoValue: ""
+			},
+			methods: {
+				//修改过点时间scope.$index,scope.row.planId
+				updatetime(index, planid, planno) {
+					console.log(index, planid)
+					let that = this
+					if (!that.setUpValue) {
+						that.$message({
+							message: '先勾选调整计划',
+							type: 'warning'
+						});
+						return
+					}
+					that.$prompt('请输入过点时间', "", {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+					}).then(({
+						value
+					}) => {
+						// if (!value) {
+						// 	that.$message({
+						// 		message: '请输入过点时间',
+						// 		type: 'warning'
+						// 	});
+						// 	return
+						// }
+						let data = {
+							'index': index,
+							'code': index == 0 ? planno : planid,
+							'time':value
+						}
+						Network(that, 'mesfact/updateTimeByPlanId', "get", data, function(res) {
+							that.$message({
+								message: '修改成功',
+								type: 'success'
+							});
+							that.loadData()
+						}, function(msg) {
+							that.$message.error(msg);
+						})
+				 }).catch(() => {
+						that.$message({
+				 		type: 'info',
+							message: '取消输入'
+						});
+					});
+				},
+				//批量修改
+				updateBatch(state) {
+					let that = this
+					if (!that.setUpValue) {
+						that.$message({
+							message: '先勾选调整计划',
+							type: 'warning'
+						});
+						return
+					}
+					if (that.multipleSelection.length == 0) {
+						that.$message({
+							message: '尚未勾选',
+							type: 'warning'
+						});
+						return
+					}
+
+					that.$confirm('此操作将批量修改计划状态, 是否继续?', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						let ids = ""
+						console.log("sasasa")
+						if (that.tableData.length == that.multipleSelection.length) {
+							//修改所有状态
+							ids = that.tableData[0].planno
+						} else {
+							for (var i = 0; i < that.multipleSelection.length; i++) {
+								ids += that.multipleSelection[i].planId + ","
+							}
+						}
+						let data = {
+							"state": state,
+							"ids": ids
+						}
+						console.log(data)
+						Network(that, 'mesfact/updateStateByBatch', "post", data, function(res) {
+							that.$message({
+								message: '修改成功',
+								type: 'success'
+							});
+							that.loadData()
+						}, function(msg) {
+							that.$message.error(msg);
+						})
+					}).catch(() => {
+						that.$message({
+							type: 'info',
+							message: '已取消操作'
+						});
+					});
+				},
+				//开始修改计划状态
+				updateplanstate() {
+					let that = this
+					let data = {
+						"state": that.setUpValue ? 1 : 0
+					}
+					Network(that, 'mesfact/notifyPlanAdjust', "GET", data, function(res) {
+						that.$message({
+							message: '开启成功',
+							type: 'success'
+						});
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+				},
+				// 修改计划状态
+				updateState(i, planid, state) {
+					let that = this
+					if (!that.setUpValue) {
+						that.$message({
+							message: '先勾选调整计划',
+							type: 'warning'
+						});
+						return
+					}
+					that.$confirm('此操作将修改计划状态, 是否继续?', '提示', {
+						confirmButtonText: '确定',
+						cancelButtonText: '取消',
+						type: 'warning'
+					}).then(() => {
+						let data = {
+							"planid": planid,
+							"state": state
+						}
+						Network(that, 'mesfact/updatePlanTime', "GET", data, function(res) {
+							if (state == 0) {
+								that.tableData[i].state = 0
+								that.tableData[i].strsText = '未开始'
+								that.tableData[i].colorState = "state0"
+							} else {
+								that.tableData[i].state = 2
+								that.tableData[i].strsText = '已完成'
+								that.tableData[i].colorState = "state2"
+							}
+							that.$message({
+								message: '编辑成功',
+								type: 'success'
+							});
+						}, function(msg) {
+							that.$message.error(msg);
+						})
+					}).catch(() => {
+						that.$message({
+							type: 'info',
+							message: '已取消操作'
+						});
+					});
+				},
+				/* 线体改变更改计划号 并且 加载计划*/
+				lineupdate() {
+					let that = this
+					that.planNoValue = ''
+					let data = {
+						"lineno": that.lineValue,
+					}
+					Network(that, 'mesfact/selectPlanNoByLine', "GET", data, function(res) {
+						that.planNoList = res.list
+						if (that.planNoList.length > 0) {
+							that.planNoValue = that.planNoList[0].planno
+							that.plannoupdate()
+						}
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+				},
+				plannoupdate() {
+					this.loadData()
+				},
+				handleSelectionChange(val) {
+					this.multipleSelection = val;
+				},
+				loadData() {
+					//
+					let that = this
+					if (!that.planNoValue) {
+						return
+					}
+					let data = {
+						"planno": that.planNoValue,
+					}
+					Network(that, 'mesfact/selectPlanByPage', "GET", data, function(res) {
+						for (var i = 0; i < res.list.length; i++) {
+							let str = ''
+							switch (res.list[i].linetype) {
+								case '6283':
+									str = '前排'
+									break
+								case '6285':
+									str = '中排'
+									break
+								case '6287':
+									str = '三排'
+									break
+							}
+							let strs = ''
+							let colorState = ''
+							switch (res.list[i].state) {
+								case 0:
+									strs = '未开始'
+									colorState = "state0"
+									break
+								case 1:
+									strs = '执行中'
+									colorState = "state1"
+									break
+								case 2:
+									strs = '已完成'
+									colorState = "state2"
+									break
+							}
+							res.list[i].lineTypeText = str
+							res.list[i].strsText = strs
+							res.list[i].colorState = colorState
+
+						}
+						that.tableData = res.list
+					}, function(msg) {
+						that.$message.error(msg);
+					})
+				}
+			},
+			created: function() {
+				//this.loadData()
+				this.lineupdate()
+			}
+		})
+	</script>
+</html>

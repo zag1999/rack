@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>浩亚智能科技</title>
+    <link rel="stylesheet" href="../../js/element.css">
+    <style>
+        html,
+        body {
+            height: 100vh;
+            padding: 0;
+            margin: 0;
+        }
+
+        .fl-row {
+            display: flex;
+            padding: .5rem 1rem;
+            height: 10vh;
+        }
+
+        .fl-btn {
+            flex: 1 1 auto;
+            font-size: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app" style="height: 100vh;padding:0;margin:0">
+        <div class="fl-row">
+            <el-button class="fl-btn" type="primary" @click="sendPlcCommand('Q1', 1)">前排取料灯全亮</el-button>
+            <el-button class="fl-btn" type="primary" @click="sendPlcCommand('Q0', 1)">前排入库灯全亮</el-button>
+            <el-button class="fl-btn" type="primary" @click="sendPlcCommand('Q1', 0)">前排取料灯全灭</el-button>
+            <el-button class="fl-btn" type="primary" @click="sendPlcCommand('Q0', 0)">前排入库灯全灭</el-button>
+            <el-button class="fl-btn" type="primary" @click="reset('Q1')">前排取料重置</el-button>
+            <el-button class="fl-btn" type="primary" @click="reset('Q0')">前排入库重置</el-button>
+        </div>
+        <div class="fl-row">
+            <el-button class="fl-btn" type="primary" @click="sendPlcCommand('Z1', 1)">中排取料灯全亮</el-button>
+            <el-button class="fl-btn" type="primary" @click="sendPlcCommand('Z0', 1)">中排入库灯全亮</el-button>
+            <el-button class="fl-btn" type="primary" @click="sendPlcCommand('Z1', 0)">中排取料灯全灭</el-button>
+            <el-button class="fl-btn" type="primary" @click="sendPlcCommand('Z0', 0)">中排入库灯全灭</el-button>
+            <el-button class="fl-btn" type="primary" @click="reset('Z1')">中排取料重置</el-button>
+            <el-button class="fl-btn" type="primary" @click="reset('Z0')">中排入库重置</el-button>
+        </div>
+        <div class="fl-row">
+            <el-button class="fl-btn" type="primary" @click="sendPlcCommand('S1', 1)">三排取料灯全亮</el-button>
+            <el-button class="fl-btn" type="primary" @click="sendPlcCommand('S0', 1)">三排入库灯全亮</el-button>
+            <el-button class="fl-btn" type="primary" @click="sendPlcCommand('S1', 0)">三排取料灯全灭</el-button>
+            <el-button class="fl-btn" type="primary" @click="sendPlcCommand('S0', 0)">三排入库灯全灭</el-button>
+            <el-button class="fl-btn" type="primary" @click="reset('S1')">三排取料重置</el-button>
+            <el-button class="fl-btn" type="primary" @click="reset('S0')">三排入库重置</el-button>
+        </div>
+    </div>
+    <script src="../../js/jquery-1.10.2.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../js/vue.js" type="text/javascript" charset="utf-8"></script>
+    <script src="../../js/getUrlParam.js"></script>
+    <script src="../../js/datav.js"></script>
+    <script src="../../js/element.js"></script>
+    <script src="../../js/network.js"></script>
+    <script type="text/javascript" charset="utf-8">
+        var app = new Vue({
+            el: "#app",
+            data: {},
+            methods: {
+                sendPlcCommand(type, light) {
+                    let that = this
+                    let url = light == 1 ? 'plc-operator/all-light-on/' : 'plc-operator/all-light-off/'
+                    Network(that, url + type, "POST", {}, function (res) {
+                        that.$message.info("执行成功！");
+                    }, function (msg) {
+                        that.$message.error(msg);
+                    })
+                },
+                reset(type) {
+                    let that = this
+                    let url = 'plc-operator/reset/'
+                    Network(that, url + type, "POST", {}, function (res) {
+                        that.$message.info("执行成功！");
+                    }, function (msg) {
+                        that.$message.error(msg);
+                    })
+                }
+            }
+        })
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.rack.mapper.MatRackInfoMapper">
+    <resultMap id="BaseResultMap" type="com.jm.rack.pojo.MatRackInfo">
+        <id property="mrid" column="mrid" jdbcType="BIGINT"/>
+        <result property="rackno" column="rackno" jdbcType="VARCHAR"/>
+        <result property="code" column="code" jdbcType="VARCHAR"/>
+        <result property="name" column="name" jdbcType="VARCHAR"/>
+        <result property="matnum" column="matnum" jdbcType="INTEGER"/>
+        <result property="matmax" column="matmax" jdbcType="INTEGER"/>
+        <result property="matmin" column="matmin" jdbcType="INTEGER"/>
+        <result property="createtime" column="createtime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        mrid,
+        rackno,
+        code,
+        name,
+        matnum,
+        matmax,
+        matmin,
+        createtime
+    </sql>
+    <update id="updateMatnumByCode">
+        update mat_rack_info
+        set matnum = #{matnum,jdbcType=NUMERIC}
+        where code = #{code,jdbcType=VARCHAR}
+    </update>
+
+    <update id="updateMatNumByOneCode" parameterType="java.util.Map">
+        UPDATE mat_rack_info
+        SET matnum = (SELECT c.count
+                      from (SELECT b.matnum - #{count} as count from mat_rack_info as b WHERE b.code = #{code}) as c)
+        WHERE code = #{code}
+    </update>
+
+
+    <select id="selectBymatmin" resultType="com.jm.rack.pojo.MatRackInfo" parameterType="java.lang.String">
+        SELECT *
+        from mat_rack_info
+        WHERE matnum &lt; matmin
+          and rackno like #{code}
+    </select>
+</mapper>

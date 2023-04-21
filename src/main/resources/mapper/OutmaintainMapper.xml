@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.jm.rack.mapper.OutmaintainMapper">
+
+    <resultMap id="BaseResultMap" type="com.jm.rack.pojo.Outmaintain">
+            <id property="outid" column="outid" jdbcType="BIGINT"/>
+            <result property="prono" column="prono" jdbcType="VARCHAR"/>
+            <result property="matcode" column="matcode" jdbcType="VARCHAR"/>
+            <result property="matname" column="matname" jdbcType="VARCHAR"/>
+            <result property="count" column="count" jdbcType="INTEGER"/>
+            <result property="creatrtime" column="creatrtime" jdbcType="TIMESTAMP"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        outid,prono,matcode,
+        matname,count,creatrtime
+    </sql>
+</mapper>
