@@ -8,7 +8,7 @@ public enum PlcShortInstruct {
     /**
      * 黄灯
      */
-    YELLOW_LIGHT((short) 0x03FF),
+    YELLOW_LIGHT((short) 0x3E80),
     /**
      * 红灯
      */

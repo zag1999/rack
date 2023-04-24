@@ -11,6 +11,11 @@ public class StoveAndPlcPo extends ESign {
      * matinfo表的主键
      */
     private Long matid;
+
+    /**
+     * rackinfo表的主键
+     */
+    private Long mrid;
     /**
      * 库存减去多少
      */

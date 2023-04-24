@@ -57,11 +57,8 @@ public class RackScheduleTask {
 
 
     //5分钟显示一次数量 前排 并且有声
-    @Scheduled(cron = "0 0/5 * * * ?")
+    @Scheduled(fixedRate = (60000*5))
     private void checkQRack() {
-        if (true) {
-            return;
-        }
         //前排
         QueryWrapper<MatRackInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper.likeRight("rackno", "Q");
@@ -116,103 +113,97 @@ public class RackScheduleTask {
             }
         });
     }
-    //8分钟显示一次数量 中排 并且有声
-//    @Scheduled(cron = "0 0/8 * * * ?")
-//    private void checkZRack() {
-//        if (true) {
-//            return;
-//        }
-//        //中排
-//        QueryWrapper<MatRackInfo> queryWrapper = new QueryWrapper<>();
-//        queryWrapper.likeRight("rackno", "Z");
-//        List<MatRackInfo> matRackInfos = matRackInfoMapper.selectList(queryWrapper);
-//
-//        List<MatRackInfo> matRackInfos1 = matRackInfoMapper.selectBymatmin("Z%");
-//        if (matRackInfos1.size()>0){
-//            StringBuilder string = new StringBuilder();
-//            for (MatRackInfo matRackInfo: matRackInfos1
-//            ) {
-//                string.append("中排报警").append(matRackInfo.getRackno()).append("物料").append(matRackInfo.getName());
-//            }
-//            string.append("库存不足，请及时补货");
-//            for (int i = 0; i < 3; i++) {
-//                CommonUtils.readSpeech(string.toString());
-//            }
-//        }
-//        List<JSONObject> QList = new ArrayList<>();
-//        List<String> codeList = new ArrayList<>();
-//
-//        for (MatRackInfo item : matRackInfos
-//        ) {
-//            //补货口
-//            if (codeList.contains(item.getRackno())){
-//                continue;
-//            }
-//            QueryWrapper<ESign> queryWrapper3 = new QueryWrapper<>();
-//            queryWrapper3.eq("stocksign", 0).eq("matno", item.getRackno());
-//            ESign eSign = eSignMapper.selectOne(queryWrapper3);
-//            JSONObject jsonObject1 = new JSONObject();
-//            jsonObject1.put("com", "com" + eSign.getComNo());
-//            jsonObject1.put("comchild", eSign.getComChildNo());
-//            jsonObject1.put("count", item.getMatnum());
-//            jsonObject1.put("color", "无");
-//            QList.add(jsonObject1);
-//            codeList.add(item.getRackno());
-//        }
-//        JSONObject qJsonObject = new JSONObject();
-//        qJsonObject.put("type", 1);
-//        qJsonObject.put("list", QList);
-//        WebSocketServer.sendSingleInfo("cplus2", qJsonObject);
-//    }
+//    8分钟显示一次数量 中排 并且有声
+    @Scheduled(fixedRate = (60000*8))
+    private void checkZRack() {
+        //中排
+        QueryWrapper<MatRackInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.likeRight("rackno", "Z");
+        List<MatRackInfo> matRackInfos = matRackInfoMapper.selectList(queryWrapper);
 
-    //3分钟显示一次数量 后排 并且有声
-//    @Scheduled(cron = "0 0/3 * * * ?")
-//    private void checkSRack() {
-//        if (true) {
-//            return;
-//        }
-//        //中排
-//        QueryWrapper<MatRackInfo> queryWrapper = new QueryWrapper<>();
-//        queryWrapper.likeRight("rackno", "S");
-//        List<MatRackInfo> matRackInfos = matRackInfoMapper.selectList(queryWrapper);
-//
-//        List<MatRackInfo> matRackInfos1 = matRackInfoMapper.selectBymatmin("S%");
-//        if (matRackInfos1.size()>0){
-//            StringBuilder string = new StringBuilder();
-//            for (MatRackInfo matRackInfo: matRackInfos1
-//            ) {
-//                string.append("三排报警").append(matRackInfo.getRackno()).append("物料").append(matRackInfo.getName());
-//            }
-//            string.append("库存不足，请及时补货");
-//            for (int i = 0; i < 3; i++) {
-//                CommonUtils.readSpeech(string.toString());
-//            }
-//        }
-//        List<JSONObject> QList = new ArrayList<>();
-//        List<String> codeList = new ArrayList<>();
-//
-//        for (MatRackInfo item : matRackInfos
-//        ) {
-//            //补货口
-//            if (codeList.contains(item.getRackno())){
-//                continue;
-//            }
-//            QueryWrapper<ESign> queryWrapper3 = new QueryWrapper<>();
-//            queryWrapper3.eq("stocksign", 0).eq("matno", item.getRackno());
-//            ESign eSign = eSignMapper.selectOne(queryWrapper3);
-//            JSONObject jsonObject1 = new JSONObject();
-//            jsonObject1.put("com", "com" + eSign.getComNo());
-//            jsonObject1.put("comchild", eSign.getComChildNo());
-//            jsonObject1.put("count", item.getMatnum());
-//            jsonObject1.put("color", "无");
-//            QList.add(jsonObject1);
-//            codeList.add(item.getRackno());
-//        }
-//        JSONObject qJsonObject = new JSONObject();
-//        qJsonObject.put("type", 1);
-//        qJsonObject.put("list", QList);
-//        WebSocketServer.sendSingleInfo("cplus3", qJsonObject);
-//    }
+        List<MatRackInfo> matRackInfos1 = matRackInfoMapper.selectBymatmin("Z%");
+        if (matRackInfos1.size()>0){
+            StringBuilder string = new StringBuilder();
+            for (MatRackInfo matRackInfo: matRackInfos1
+            ) {
+                string.append("中排报警").append(matRackInfo.getRackno()).append("物料").append(matRackInfo.getName());
+            }
+            string.append("库存不足，请及时补货");
+            for (int i = 0; i < 3; i++) {
+                CommonUtils.readSpeech(string.toString());
+            }
+        }
+        List<JSONObject> QList = new ArrayList<>();
+        List<String> codeList = new ArrayList<>();
+
+        for (MatRackInfo item : matRackInfos
+        ) {
+            //补货口
+            if (codeList.contains(item.getRackno())){
+                continue;
+            }
+            QueryWrapper<ESign> queryWrapper3 = new QueryWrapper<>();
+            queryWrapper3.eq("stocksign", 0).eq("matno", item.getRackno());
+            ESign eSign = eSignMapper.selectOne(queryWrapper3);
+            JSONObject jsonObject1 = new JSONObject();
+            jsonObject1.put("com", "com" + eSign.getComNo());
+            jsonObject1.put("comchild", eSign.getComChildNo());
+            jsonObject1.put("count", item.getMatnum());
+            jsonObject1.put("color", "无");
+            QList.add(jsonObject1);
+            codeList.add(item.getRackno());
+        }
+        JSONObject qJsonObject = new JSONObject();
+        qJsonObject.put("type", 1);
+        qJsonObject.put("list", QList);
+        WebSocketServer.sendSingleInfo("cplus2", qJsonObject);
+    }
+
+//    3分钟显示一次数量 后排 并且有声
+    @Scheduled(fixedRate = (60000*3))
+    private void checkSRack() {
+        //中排
+        QueryWrapper<MatRackInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.likeRight("rackno", "S");
+        List<MatRackInfo> matRackInfos = matRackInfoMapper.selectList(queryWrapper);
+
+        List<MatRackInfo> matRackInfos1 = matRackInfoMapper.selectBymatmin("S%");
+        if (matRackInfos1.size()>0){
+            StringBuilder string = new StringBuilder();
+            for (MatRackInfo matRackInfo: matRackInfos1
+            ) {
+                string.append("三排报警").append(matRackInfo.getRackno()).append("物料").append(matRackInfo.getName());
+            }
+            string.append("库存不足，请及时补货");
+            for (int i = 0; i < 3; i++) {
+                CommonUtils.readSpeech(string.toString());
+            }
+        }
+        List<JSONObject> QList = new ArrayList<>();
+        List<String> codeList = new ArrayList<>();
+
+        for (MatRackInfo item : matRackInfos
+        ) {
+            //补货口
+            if (codeList.contains(item.getRackno())){
+                continue;
+            }
+            QueryWrapper<ESign> queryWrapper3 = new QueryWrapper<>();
+            queryWrapper3.eq("stocksign", 0).eq("matno", item.getRackno());
+            ESign eSign = eSignMapper.selectOne(queryWrapper3);
+            JSONObject jsonObject1 = new JSONObject();
+            jsonObject1.put("com", "com" + eSign.getComNo());
+            jsonObject1.put("comchild", eSign.getComChildNo());
+            jsonObject1.put("count", item.getMatnum());
+            jsonObject1.put("color", "无");
+            QList.add(jsonObject1);
+            codeList.add(item.getRackno());
+        }
+        JSONObject qJsonObject = new JSONObject();
+        qJsonObject.put("type", 1);
+        qJsonObject.put("list", QList);
+        WebSocketServer.sendSingleInfo("cplus3", qJsonObject);
+    }
 
     //定时 半小时 更新计划
     @Scheduled(cron = "0 0/10 * * * ?")

@@ -42,15 +42,17 @@ public class HslHelper {
     private SiemensS7Net X1siemensS7Net;
     private SiemensS7Net X2siemensS7Net;
     private SiemensS7Net X3siemensS7Net;
+    private SiemensS7Net Q1siemensS7Net;
 
     //前排取货显示数cm1,2 格式一样 前排库存cm3,4格式一样
     //中排1就是取货显示数,cm5,6,7
     //中排2就是库存,cm8,9,10
     //三排就是,cm10取货,11库存
     private HslHelper(){
-
+        Q1siemensS7Net = new SiemensS7Net(SiemensPLCS.S1200, "10.57.31.133");
         //前排料架控制器
         QsiemensS7Net = new SiemensS7Net(SiemensPLCS.S1200,"10.57.31.97");
+
         //中排料架控制器1
         Z1siemensS7Net = new SiemensS7Net(SiemensPLCS.S1200,"10.57.31.98");
         //中排料架控制器2
@@ -65,6 +67,9 @@ public class HslHelper {
 
     public SiemensS7Net getQsiemensS7Net() {
         return QsiemensS7Net;
+    }
+    public SiemensS7Net getQ1siemensS7Net() {
+        return Q1siemensS7Net;
     }
     public SiemensS7Net getZ1siemensS7Net() {
         return Z1siemensS7Net;
@@ -157,6 +162,12 @@ public class HslHelper {
             if (operateResult.IsSuccess){
                 res = true;
             }
+        }else if ("Q1".equals(type)){
+            //中排
+            OperateResult operateResult = getQ1siemensS7Net().Write(db,b);
+            if (operateResult.IsSuccess){
+                res = true;
+            }
         }else if ("Z".equals(type)){
             //中排
             OperateResult operateResult = getZ1siemensS7Net().Write(db,b);
@@ -192,6 +203,12 @@ public class HslHelper {
         if ("Q".equals(type)){
             //前排
             OperateResultExOne<Short> resultState = getQsiemensS7Net().ReadInt16(db);
+            if (resultState.IsSuccess){
+                return resultState.Content.intValue();
+            }
+        }else if ("Q1".equals(type)){
+            //
+            OperateResultExOne<Short> resultState = getQ1siemensS7Net().ReadInt16(db);
             if (resultState.IsSuccess){
                 return resultState.Content.intValue();
             }

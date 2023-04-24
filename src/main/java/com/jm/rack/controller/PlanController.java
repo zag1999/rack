@@ -67,6 +67,7 @@ public class PlanController {
     private StoreOperateService storeOperateService;
     @Resource
     private CommonCache commonCache;
+    public static boolean isTrue = true;
 
     SimpleDateFormat fmt = new SimpleDateFormat("yyyyMMdd");
 
@@ -298,7 +299,7 @@ public class PlanController {
             jsonObjectList.add(jsonObject);
         }
         //最后要根据type判断向哪个料架地址发送交互字告诉plc进行显数亮灯
-        if (null != rackSign) {
+        if (null != rackSign && eSignList11.size() != 0) {
             HslHelper.getInstance().writeJiaoHuZi(rackSign);
         }
         //写完交互字要显示库存数,写完库存数也要写交互字,交互字地址就是对应的101的显数地址
@@ -326,6 +327,7 @@ public class PlanController {
 
     /**
      * 查询状态,修改页面当前计划物料状态,修改库存数
+     *
      * @param type
      * @return
      * @throws InterruptedException
@@ -351,13 +353,13 @@ public class PlanController {
                 //避免plc还没有进行赋值
                 Thread.sleep(3000);
                 //读库存数完成信号118
-                Integer kucun1 = HslHelper.getInstance().readInt("DB301.DBW118.0", "Q");
-                Integer kucun2 = HslHelper.getInstance().readInt("DB401.DBW118.0", "Q");
-                if (kucun1 == 1){
-                    HslHelper.getInstance().writeShort("DB301.DBW118.0", HslHelper.QUAN_MIE_OVER_VALUE, "Q");
+                Integer kucun1 = HslHelper.getInstance().readInt("DB301.DBW118.0", "Q1");
+                Integer kucun2 = HslHelper.getInstance().readInt("DB401.DBW118.0", "Q1");
+                if (kucun1 == 1) {
+                    HslHelper.getInstance().writeShort("DB301.DBW118.0", HslHelper.QUAN_MIE_OVER_VALUE, "Q1");
                 }
-                if (kucun2 == 1){
-                    HslHelper.getInstance().writeShort("DB401.DBW118.0", HslHelper.QUAN_MIE_OVER_VALUE, "Q");
+                if (kucun2 == 1) {
+                    HslHelper.getInstance().writeShort("DB401.DBW118.0", HslHelper.QUAN_MIE_OVER_VALUE, "Q1");
                 }
                 // 如果减库存成功才会通知前端切换计划
                 readState = success;
@@ -382,13 +384,13 @@ public class PlanController {
                 Integer kucun1 = HslHelper.getInstance().readInt("DB801.DBW118.0", "Z2");
                 Integer kucun2 = HslHelper.getInstance().readInt("DB901.DBW118.0", "Z2");
                 Integer kucun3 = HslHelper.getInstance().readInt("DB1001.DBW118.0", "Z2");
-                if (kucun1 == 1){
+                if (kucun1 == 1) {
                     HslHelper.getInstance().writeShort("DB801.DBW118.0", HslHelper.QUAN_MIE_OVER_VALUE, "Z2");
                 }
-                if (kucun2 == 1){
+                if (kucun2 == 1) {
                     HslHelper.getInstance().writeShort("DB901.DBW118.0", HslHelper.QUAN_MIE_OVER_VALUE, "Z2");
                 }
-                if (kucun3 == 1){
+                if (kucun3 == 1) {
                     HslHelper.getInstance().writeShort("DB1001.DBW118.0", HslHelper.QUAN_MIE_OVER_VALUE, "Z2");
                 }
                 // 如果减库存成功才会通知前端切换计划
@@ -400,19 +402,33 @@ public class PlanController {
             //三排取货口完成信号
             Integer sign1101 = HslHelper.getInstance().readInt("DB1101." + HslHelper.QUAN_MIE_OVER_170, "S");
             if (sign1101 == 1) {
-                // 读到完成总信号后告诉plc进行复位
-                HslHelper.getInstance().writeShort("DB1101." + HslHelper.QUAN_MIE_OVER_170, HslHelper.QUAN_MIE_OVER_VALUE, "S");
                 // 执行减库存
                 boolean success = storeOperateService.subtractStore(type);
-                //避免plc还没有进行赋值
-                Thread.sleep(3000);
-                //读库存数完成信号118
-                Integer kucun1 = HslHelper.getInstance().readInt("DB1201.DBW118.0", "S");
-                if (kucun1 == 1){
-                    HslHelper.getInstance().writeShort("DB1201.DBW118.0", HslHelper.QUAN_MIE_OVER_VALUE, "S");
+                if (success) {
+                    // 读到完成总信号后告诉plc进行复位
+                    isTrue = HslHelper.getInstance().writeShort("DB1101." + HslHelper.QUAN_MIE_OVER_170, HslHelper.QUAN_MIE_OVER_VALUE, "S");
+                    while (!isTrue) {
+                        isTrue = HslHelper.getInstance().writeShort("DB1101." + HslHelper.QUAN_MIE_OVER_170, HslHelper.QUAN_MIE_OVER_VALUE, "S");
+                    }
+                    //避免plc还没有进行赋值
+                    //读库存数完成信号118
+                    Integer kucun1 = HslHelper.getInstance().readInt("DB1201.DBW118.0", "S");
+                    while (kucun1 == 0) {
+                        kucun1 = HslHelper.getInstance().readInt("DB1201.DBW118.0", "S");
+                    }
+                    if (kucun1 == 1) {
+                        isTrue = HslHelper.getInstance().writeShort("DB1201.DBW118.0", HslHelper.QUAN_MIE_OVER_VALUE, "S");
+                        while (!isTrue) {
+                            isTrue = HslHelper.getInstance().writeShort("DB1201.DBW118.0", HslHelper.QUAN_MIE_OVER_VALUE, "S");
+                        }
+                    }
+                    readState = true;
+                }else {
+                    // 如果减库存成功才会通知前端切换计划
+                    readState = success;
                 }
-                // 如果减库存成功才会通知前端切换计划
-                readState = success;
+
+
             }
         }
         resultMap.put("result", "success");
@@ -492,22 +508,25 @@ public class PlanController {
             map.put("msg", CommonUtils.getInstance().PARAM_LOSE);
             return map;
         }
-
+        int i = planInfoMapper.updateById(planInfo);
+        while (i==0){
+            i = planInfoMapper.updateById(planInfo);
+        }
         try {
-            if (planInfo.getState() == 2) {
-                planMatInfoMapper.updateMatstateByPlanid(1, planInfo.getPlanId());
-                List<PlanMatInfo> planMatInfos = planMatInfoMapper.selectAllByPlanid(planInfo.getPlanId());
-                //查数量修改数量
-                for (PlanMatInfo planMatInfo : planMatInfos) {
-                    //当计划变更,那么上次计划物料相对应的库存数应减一,
-                    // 只需要将库存数减一就行,定时任务会定时查库存数
-                    Map<String, Object> map1 = new HashMap<>();
-                    map1.put("code", planMatInfo.getMatno());
-                    map1.put("count", planMatInfo.getQuantity());
-                    matRackInfoMapper.updateMatNumByOneCode(map1);
-                }
-            }
-            planInfoMapper.updateById(planInfo);
+//            if (planInfo.getState() == 2) {
+//                planMatInfoMapper.updateMatstateByPlanid(1, planInfo.getPlanId());
+//                List<PlanMatInfo> planMatInfos = planMatInfoMapper.selectAllByPlanid(planInfo.getPlanId());
+//                //查数量修改数量
+//                for (PlanMatInfo planMatInfo : planMatInfos) {
+//                    //当计划变更,那么上次计划物料相对应的库存数应减一,
+//                    // 只需要将库存数减一就行,定时任务会定时查库存数
+//                    Map<String, Object> map1 = new HashMap<>();
+//                    map1.put("code", planMatInfo.getMatno());
+//                    map1.put("count", planMatInfo.getQuantity());
+//                    matRackInfoMapper.updateMatNumByOneCode(map1);
+//                }
+//            }
+
             if (!CommonUtils.getInstance().IsStringEmpty(planInfo.getStr())) {
                 QueryWrapper<MatRackInfo> queryWrapper = new QueryWrapper<>();
                 queryWrapper.likeRight("rackno", "Q");
@@ -725,6 +744,7 @@ public class PlanController {
 
     /**
      * 根据计划id查询当前计划所需物料信息
+     *
      * @param planId
      * @return
      */

@@ -40,13 +40,16 @@ public class InitStove {
                 // 库存值写入plc
                 plcHandleService.writeInt(po.getPlcip(), po.getComNo() + po.getComChildNo(), (short) value);
                 if (value <= po.getMatmin()) {
-                    plcHandleService.writeInt(po.getPlcip(), po.getComNo() + po.getOpenLight(), PlcShortInstruct.YELLOW_LIGHT.getValue());
+                    plcHandleService.writeInt(po.getPlcip(), po.getComNo() + po.getOpenLight(), PlcShortInstruct.RED_LIGHT.getValue());
                 }
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
         }
         // 发送交互字
-        interactionSignService.sendInteraction(list, InteractionOperator.NUM_CHANGE, InteractionOperator.LIGHT_ON);
+//        interactionSignService.sendInteraction(list, InteractionOperator.NUM_CHANGE, InteractionOperator.LIGHT_ON);
+        interactionSignService.sendInteraction(list, InteractionOperator.NUM_CHANGE);
+        
+        interactionSignService.sendInteraction(list, InteractionOperator.STOVE_FINISH);
     }
 }

@@ -55,7 +55,7 @@ public class StoreOperateService {
                 // 写入plc
                 plcHandleService.writeInt(po.getPlcip(), po.getComNo() + po.getComChildNo(), (short) value);
                 //更细数据库
-                matRackInfoMapper.updateMatnumByCode(value, po.getMatno());
+                matRackInfoMapper.updateMatnumByMrid(value, po.getMrid());
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
@@ -75,8 +75,8 @@ public class StoreOperateService {
         List<StoveAndPlcPo> negative = new ArrayList<>();
         List<StoveAndPlcPo> exceedAlarmValue = new ArrayList<>();
         for (StoveAndPlcPo po : list) {
-            if ((po.getMatnum() - po.getQuantity()) < 0) negative.add(po);
-            if ((po.getMatnum() - po.getQuantity()) < po.getMatmin()) exceedAlarmValue.add(po);
+            if ((po.getMatnum() - po.getQuantity()) <= 0) negative.add(po);
+            if ((po.getMatnum() - po.getQuantity()) <= po.getMatmin()) exceedAlarmValue.add(po);
         }
         if (negative.size() > 0) {
             sendNegativeAlarm(negative);
@@ -124,7 +124,7 @@ public class StoreOperateService {
         for (StoveAndPlcPo g : exceedAlarmValue) {
             try {
                 // 亮黄灯
-                plcHandleService.writeInt(g.getPlcip(), g.getComNo() + g.getOpenLight(), PlcShortInstruct.YELLOW_LIGHT.getValue());
+                plcHandleService.writeInt(g.getPlcip(), g.getComNo() + g.getOpenLight(), PlcShortInstruct.RED_LIGHT.getValue());
             } catch (Exception e) {
                 log.error(e.getMessage());
             }
@@ -149,15 +149,17 @@ public class StoreOperateService {
         List<Long> needFinish = new ArrayList<>();
         for (StoveAndPlcPo item : list) {
             try {
-                int value = plcHandleService.readInt(item.getPlcip(), item.getComNo() + item.getState());
-                if (value == 1) needFinish.add(item.getMatid());
+//                int value = plcHandleService.readInt(item.getPlcip(), item.getComNo() + item.getState());
+//                if (value == 1)
+                needFinish.add(item.getMatid());
                 //读到1已拣货状态时显示给页面并且需要再将状态复位
-                if (value == 1) plcHandleService.writeInt(item.getPlcip(), item.getComNo() + item.getState(), (short) 0);
+//                if (value == 1) plcHandleService.writeInt(item.getPlcip(), item.getComNo() + item.getState(), (short) 0);
             } catch (Exception e) {
                 log.error("读取ip为" + item.getPlcip() + "plc点" + item.getComNo() + item.getState() + "失败", e);
             }
         }
         //当读到有拍灯的时候再去修改数据库状态
-        if (null != needFinish && needFinish.size() > 0) planMatInfoMapper.toFinishById(needFinish);
+//        if (null != needFinish && needFinish.size() > 0)
+            planMatInfoMapper.toFinishById(needFinish);
     }
 }

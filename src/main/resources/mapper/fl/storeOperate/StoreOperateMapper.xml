@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="com.jm.rack.fl.storeOperate.mapper.StoreOperateMapper">
     <select id="selectStovePlcDataByPlanId" resultType="com.jm.rack.fl.storeOperate.po.StoveAndPlcPo">
-        select mat_info.matid, mat_info.quantity, rack_info.matnum, rack_info.matmax, rack_info.matmin, sign.*
+        select mat_info.matid,mat_info.quantity, rack_info.matnum, rack_info.matmax, rack_info.matmin,rack_info.mrid, sign.*
         from plan_mat_info mat_info
                  left join mat_rack_info rack_info on mat_info.matno = rack_info.code
                  left join e_sign sign on rack_info.rackno = sign.matno

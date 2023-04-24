@@ -17,10 +17,11 @@ import java.util.Map;
 public interface MatRackInfoMapper extends BaseMapper<MatRackInfo> {
 
     int updateMatnumByCode(@Param("matnum") Integer matnum, @Param("code") String code);
-
+    int updateMatnumByMrid(@Param("matnum") Integer matnum, @Param("mrid") long mrid);
     int updateMatNumByOneCode(Map<String, Object> map);
 
     List<MatRackInfo> selectBymatmin(String code);
+    List<MatRackInfo> selectAllMatNum();
 }
 
 

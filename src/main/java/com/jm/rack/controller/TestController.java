@@ -2,6 +2,7 @@ package com.jm.rack.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.jm.rack.config.RackScheduleTask;
 import com.jm.rack.mapper.ESignMapper;
 import com.jm.rack.mapper.MatRackInfoMapper;
 import com.jm.rack.pojo.ESign;
@@ -27,9 +28,30 @@ public class TestController {
     ESignMapper eSignMapper;
     @Autowired
     MatRackInfoMapper matRackInfoMapper;
+    @Autowired
+    RackScheduleTask rackScheduleTask;
 
-
-
+    @RequestMapping(value = "s")
+    public String t(){
+        QueryWrapper<MatRackInfo> queryWrapper = new QueryWrapper<>();
+        queryWrapper.likeRight("rackno", "Q");
+        /*查找所有的前排料架信息*/
+        List<MatRackInfo> matRackInfos = matRackInfoMapper.selectList(queryWrapper);
+        /*查找所有的前排料架警戒信息*/
+        List<MatRackInfo> minmMtRackInfos = matRackInfoMapper.selectBymatmin("Q%");
+        /*货物不足，语音播报*/
+        if (minmMtRackInfos.size() > 0) {
+            StringBuilder string = new StringBuilder();
+            for (MatRackInfo matRackInfo : minmMtRackInfos) {
+                string.append("前排报警").append(matRackInfo.getRackno()).append("物料").append(matRackInfo.getName());
+            }
+            string.append("库存不足，请及时补货");
+            for (int i = 0; i < 3; i++) {
+                CommonUtils.readSpeech(string.toString());
+            }
+        }
+        return "success";
+    }
 
     @RequestMapping(value = "send")
     @ResponseBody
@@ -52,6 +74,8 @@ public class TestController {
         //WebSocketServer.sendSingleInfo("mat",map);
         return map;
     }
+
+
 
 
     @RequestMapping(value = "sendSign")
@@ -176,6 +200,7 @@ public class TestController {
     @RequestMapping(value = "sendSign3")
     @ResponseBody
     public Map<String, Object> sendSign3() {
+
         Map<String,Object> map = new HashMap<>();
         List<JSONObject> QList = new ArrayList<>();
         for (int i = 1; i <= 28; i++) {

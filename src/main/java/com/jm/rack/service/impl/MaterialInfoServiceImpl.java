@@ -85,9 +85,12 @@ public class MaterialInfoServiceImpl extends ServiceImpl<MaterialInfoMapper, Mat
         eSignQueryWrapper.eq("stocksign",0).eq("matno",matRackInfo.getRackno());
         ESign eSign = eSignMapper.selectOne(eSignQueryWrapper);
         String pos = "";
-        if (eSign.getMatno().contains("Q")){
+        if ("10.57.31.97".equals(eSign.getPlcip())){
 //            pos = "cplus1";
             pos = "Q";
+        }else if ("10.57.31.133".equals(eSign.getPlcip())){
+//            pos = "cplus2";
+            pos = "Q1";
         }else if (eSign.getMatno().contains("S")){
 //            pos = "cplus2";
             pos = "S";
@@ -153,9 +156,12 @@ public class MaterialInfoServiceImpl extends ServiceImpl<MaterialInfoMapper, Mat
         eSignQueryWrapper.eq("stocksign", 0).eq("matno", matRackInfo.getRackno());
         ESign eSign = eSignMapper.selectOne(eSignQueryWrapper);
         String pos = "";
-        if (eSign.getMatno().contains("Q")){
+        if ("10.57.31.97".equals(eSign.getPlcip())){
 //            pos = "cplus1";
             pos = "Q";
+        }else if ("10.57.31.133".equals(eSign.getPlcip())){
+//            pos = "cplus2";
+            pos = "Q1";
         }else if (eSign.getMatno().contains("S")){
 //            pos = "cplus2";
             pos = "S";
@@ -181,7 +187,8 @@ public class MaterialInfoServiceImpl extends ServiceImpl<MaterialInfoMapper, Mat
                 jsonObject1.put("color","无");
                 WebSocketServer.sendSingleInfo(pos, jsonObject1);
                 //替换成告诉plc关灯
-                HslHelper.getInstance().writeShort(eSign.getComNo()+eSign.getOpenLight(), (short) 8224,pos);
+                HslHelper.getInstance().writeShort(eSign.getComNo()+eSign.getOpenLight(), (short) 1,pos);
+                HslHelper.getInstance().writeShort(eSign.getComNo()+eSign.getComChildNo(),(short) factCount,pos);
                 HslHelper.getInstance().writeShort(eSign.getComNo()+"DBW116.0",HslHelper.JIAO_HU_ZI_VALUE,pos);
                 //读到为1的时候返回2
                 Integer sign = HslHelper.getInstance().readInt(eSign.getComNo()+"DBW120.0", pos);

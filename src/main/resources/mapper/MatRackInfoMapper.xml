@@ -29,6 +29,11 @@
         set matnum = #{matnum,jdbcType=NUMERIC}
         where code = #{code,jdbcType=VARCHAR}
     </update>
+    <update id="updateMatnumByMrid">
+        update mat_rack_info
+        set matnum = #{matnum,jdbcType=NUMERIC}
+        where mrid = #{mrid,jdbcType=BIGINT}
+    </update>
 
     <update id="updateMatNumByOneCode" parameterType="java.util.Map">
         UPDATE mat_rack_info
@@ -36,7 +41,9 @@
                       from (SELECT b.matnum - #{count} as count from mat_rack_info as b WHERE b.code = #{code}) as c)
         WHERE code = #{code}
     </update>
-
+    <select id="selectAllMatNum" resultType="com.jm.rack.pojo.MatRackInfo" parameterType="java.lang.String">
+        SELECT * from mat_rack_info where 1=1;
+    </select>
 
     <select id="selectBymatmin" resultType="com.jm.rack.pojo.MatRackInfo" parameterType="java.lang.String">
         SELECT *
